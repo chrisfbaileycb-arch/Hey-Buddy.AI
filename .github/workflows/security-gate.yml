@@ -1,0 +1,58 @@
+name: Hey Buddy Security Gate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Only run one instance per branch at a time
+concurrency:
+  group: security-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-gate:
+    name: Security Gate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read       # read code
+      checks: write        # write check status
+      pull-requests: write # annotate PRs
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so we can diff properly
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install AgentShield (optional)
+        run: |
+          if npm ls -g ecc-agentshield &>/dev/null 2>&1; then
+            echo "ecc-agentshield already installed"
+          else
+            npm install -g ecc-agentshield 2>/dev/null || echo "AgentShield not available — continuing without it"
+          fi
+
+      - name: Run Security Gate
+        id: gate
+        run: node scripts/nexus-gate.mjs
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+
+      - name: Annotate PR on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '## 🚫 Security Gate Failed\n\nThe Hey Buddy Security Gate detected blocking issues in this PR.\n\nPlease check the [Actions run](' + context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId + ') for details.\n\nCommon fixes:\n- Remove hardcoded API keys (use `process.env.YOUR_KEY` instead)\n- Don\'t override AI provider base URLs\n- Don\'t disable ESLint/TypeScript safety rules\n- Only make outbound calls to allowlisted hosts'
+            })

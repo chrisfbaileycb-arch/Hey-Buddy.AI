@@ -1,0 +1,144 @@
+/* ============================================================
+   agent-market.css — Hey Buddy Phase 6 Agent Marketplace & Discovery UI
+   Marketplace Modal, Category Chips, Agent Cards & 1-Click Installation
+   ============================================================ */
+
+.btn-agent-market-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--r-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(99, 210, 255, 0.12);
+  border: 1px solid rgba(99, 210, 255, 0.25);
+  color: #63d2ff;
+  cursor: pointer;
+  transition: background var(--t-fast), transform var(--t-fast);
+  white-space: nowrap;
+}
+
+.btn-agent-market-open:hover {
+  background: rgba(99, 210, 255, 0.22);
+  transform: translateY(-1px);
+}
+
+.market-modal-card {
+  max-width: 820px;
+  width: 95vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.market-search-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.market-category-chips {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.chip {
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--r-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+
+.chip.active, .chip:hover {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(167, 139, 250, 0.3);
+}
+
+.market-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.market-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: border-color var(--t-fast), transform var(--t-fast);
+}
+
+.market-card:hover {
+  border-color: rgba(99, 210, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.market-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.market-card-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--r-md);
+  background: rgba(99, 210, 255, 0.12);
+  border: 1px solid rgba(99, 210, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+
+.market-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.market-card-author {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+}
+
+.market-card-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.btn-install-agent {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--r-md);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(99, 210, 255, 0.12);
+  border: 1px solid rgba(99, 210, 255, 0.25);
+  color: #63d2ff;
+  cursor: pointer;
+  transition: background var(--t-fast);
+}
+
+.btn-install-agent:hover {
+  background: rgba(99, 210, 255, 0.25);
+}

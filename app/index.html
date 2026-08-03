@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hey Buddy — Talk to your crew. Private, local, always in your corner.">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+                 font-src https://fonts.gstatic.com;
+                 script-src 'self';
+                 connect-src https://api.openai.com https://api.anthropic.com https://generativelanguage.googleapis.com https://openrouter.ai https://nexus-relay.hey-buddy.local https://nexus-cloud-runner.hey-buddy.local;
+                 img-src 'self' data: https://tile.openstreetmap.org;
+                 frame-src https://www.openstreetmap.org;">
+  <title>Hey Buddy</title>
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0f1220" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Hey Buddy" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/sandbox-notice.css">
+  <link rel="stylesheet" href="css/hunt.css" />
+  <link rel="stylesheet" href="css/bridge.css" />
+  <link rel="stylesheet" href="css/agent-builder.css" />
+  <link rel="stylesheet" href="css/agent-market.css" />
+  <link rel="stylesheet" href="css/guide.css" />
+</head>
+<body>
+
+  <!-- ─── APP SHELL ──────────────────────────────────────────── -->
+  <div class="app-shell" id="appShell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar" aria-label="Buddy selector">
+      <div class="sidebar-top">
+        <div class="app-wordmark" aria-label="Hey Buddy">
+          <span class="wordmark-icon">👋</span>
+          <span class="wordmark-text">Hey Buddy</span>
+        </div>
+      </div>
+
+      <!-- View Tabs -->
+      <div class="view-tabs">
+        <button id="chatTabBtn" class="view-tab active" data-view="chat">💬 Chat</button>
+        <button id="huntTabBtn" class="view-tab" data-view="hunt">🗺️ Hunt</button>
+      </div>
+
+      <!-- Personas -->
+      <nav class="persona-list" id="personaList" role="navigation" aria-label="Choose a buddy">
+        <!-- First Responder — always pinned first -->
+        <div class="persona-divider">
+          <span>Always Available</span>
+        </div>
+        <button class="persona-btn" data-persona="first-responder" id="btn-first-responder"
+                aria-label="First Responder — emergency and first aid">
+          <div class="persona-btn-icon">🚑</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">First Responder</span>
+            <span class="persona-btn-tag">Emergency · First Aid · Survival</span>
+          </div>
+          <div class="persona-btn-lock" title="Always available">🔒</div>
+        </button>
+
+        <div class="persona-divider">
+          <span>Your Crew</span>
+        </div>
+
+        <button class="persona-btn active" data-persona="drill" id="btn-drill"
+                aria-label="The Drill — motivation and accountability">
+          <div class="persona-btn-icon">🔥</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">The Drill</span>
+            <span class="persona-btn-tag">No excuses. All heart.</span>
+          </div>
+        </button>
+
+        <button class="persona-btn" data-persona="haven" id="btn-haven"
+                aria-label="Haven — warm companion always present">
+          <div class="persona-btn-icon">💙</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">Haven</span>
+            <span class="persona-btn-tag">Warm. Present. Always.</span>
+          </div>
+        </button>
+
+        <button class="persona-btn" data-persona="ledger" id="btn-ledger"
+                aria-label="The Ledger — accountability tracking">
+          <div class="persona-btn-icon">📊</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">The Ledger</span>
+            <span class="persona-btn-tag">Your commitments, tracked.</span>
+          </div>
+        </button>
+
+        <button class="persona-btn" data-persona="coach" id="btn-coach"
+                aria-label="Coach — health and wellness">
+          <div class="persona-btn-icon">🌱</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">Coach</span>
+            <span class="persona-btn-tag">Health, your way.</span>
+          </div>
+        </button>
+
+        <div class="persona-divider">
+          <span>Daily Game</span>
+        </div>
+
+        <button class="persona-btn oracle-btn" data-persona="oracle" id="btn-oracle"
+                aria-label="The Oracle — daily mystery game">
+          <div class="persona-btn-icon">🔐</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">The Oracle</span>
+            <span class="persona-btn-tag">Today's mystery awaits.</span>
+          </div>
+          <div class="oracle-live-dot" aria-label="Live"></div>
+          <span class="lock-badge" aria-hidden="true">🔒</span>
+        </button>
+
+        <div class="persona-divider">
+          <span>Custom Slots</span>
+        </div>
+
+        <button class="persona-btn custom-locked" id="btn-custom-1"
+                aria-label="Custom buddy slot — requires Buddy+ membership"
+                data-persona="custom-1">
+          <div class="persona-btn-icon">✨</div>
+          <div class="persona-btn-info">
+            <span class="persona-btn-name">Your Buddy</span>
+            <span class="persona-btn-tag">Buddy+ · $7.95/mo</span>
+          </div>
+          <div class="persona-btn-upgrade">Upgrade</div>
+        </button>
+      </nav>
+
+      <!-- Sidebar footer -->
+      <div class="sidebar-footer">
+        <button class="icon-btn" id="settingsBtn" aria-label="Settings" title="Settings">⚙️</button>
+        <button class="icon-btn" id="clearBtn" aria-label="Clear conversation" title="Clear chat">🗑️</button>
+        <a href="../index.html" class="icon-btn" aria-label="Back to home" title="Home">🏠</a>
+      </div>
+    </aside>
+
+    <!-- MOBILE SIDEBAR TOGGLE -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle buddy list">
+      <span>👋</span>
+    </button>
+
+    <!-- MAIN CHAT AREA -->
+    <main class="chat-main" id="chatMain">
+
+      <!-- Chat Header -->
+      <header class="chat-header" id="chatHeader">
+        <div class="chat-header-persona">
+          <div class="chat-header-emoji" id="headerEmoji" aria-hidden="true">🔥</div>
+          <div class="chat-header-info">
+            <h1 class="chat-header-name" id="headerName">The Drill</h1>
+            <p class="chat-header-tag" id="headerTag">No excuses. All heart.</p>
+          </div>
+        </div>
+        <div class="chat-header-actions">
+          <!-- PWA install button (shown by pwa-install.js when available) -->
+          <button class="header-action-btn install-btn" id="installBtn"
+                  aria-label="Add Hey Buddy to home screen" hidden title="Install app">📲</button>
+          <!-- R1: Voice toggle -->
+          <button class="header-action-btn voice-toggle-btn" id="voiceToggleBtn"
+                  aria-label="Toggle voice" title="Voice requires a TTS server" disabled>🔇</button>
+          <!-- Phase 6: Agent Marketplace trigger -->
+          <button class="btn-agent-market-open" id="agentMarketBtn"
+                  aria-label="Open Agent Marketplace"
+                  title="Discover & install agents from community">🛒 Marketplace</button>
+          <!-- Phase 5: Agent Studio Fleet Drawer trigger -->
+          <button class="btn-agent-studio-open" id="agentStudioBtn"
+                  aria-label="Open Agent Studio"
+                  title="Build custom agents & workflows">⚡ Agent Studio</button>
+          <!-- Phase 4: Message your buddy (shown only when bridge connected) -->
+          <button class="btn-bridge-compose-open" id="bridgeComposeBtn"
+                  aria-label="Message your PC buddy"
+                  title="Send a note to your PC agent">📨 Message buddy</button>
+          <!-- R3: Bridge badge -->
+          <span class="bridge-badge" id="bridgeBadge" hidden>🔗 Connected to your PC</span>
+          <div class="connection-badge" id="connectionBadge" title="Connection status">
+            <span class="connection-dot"></span>
+            <span class="connection-label" id="connectionLabel">Setup needed</span>
+          </div>
+          <button class="btn-guide-open" id="guideBtn" aria-label="Open Guide & Safety Protocols" title="User Guide & Safety Protocols">❓ Guide & Safety</button>
+          <button class="header-action-btn" id="betaFeedbackBtn" aria-label="Beta Feedback & Diagnostics" title="Report Beta Feedback">💬</button>
+          <button class="header-action-btn" id="personaSettingsBtn" aria-label="Persona settings">
+            🎛️
+          </button>
+        </div>
+      </header>
+
+      <!-- First Responder Safety Banner (only visible on first-responder persona) -->
+      <div class="safety-banner" id="safetyBanner" hidden role="alert" aria-live="assertive">
+        <span class="safety-icon">🚨</span>
+        <div class="safety-text">
+          <strong>Life-threatening emergency? Call 911 (or your local emergency number) immediately.</strong>
+          <span>This guidance does not replace emergency services or medical professionals.</span>
+        </div>
+      </div>
+
+      <!-- ══ Hunt View ══════════════════════════════════════════════ -->
+      <div id="huntView" class="hunt-view" hidden>
+        <div class="hunt-header">
+          <div>
+            <h2>🗺️ The Hunt</h2>
+            <span id="huntPointsBadge" class="points-badge">0 pts today</span>
+          </div>
+          <button id="leaderboardBtn" class="icon-btn" title="Leaderboard">🏆</button>
+        </div>
+        <div id="huntMapContainer" class="hunt-map-container"></div>
+        <div id="waypointList" class="hunt-waypoints"></div>
+      </div>
+
+      <!-- Park Moment Nudge -->
+      <div id="parkMomentNudge" class="park-moment-nudge" hidden>
+        <div class="park-moment-inner">
+          <span class="park-moment-avatar">👋</span>
+          <div class="park-moment-text">
+            <strong id="parkMomentName">Alex</strong> is nearby (<span id="parkMomentDist">47m</span>)
+            <div class="park-moment-sub">Another Hunt player!</div>
+          </div>
+          <div class="park-moment-actions">
+            <button id="parkMomentSayHi">Say Hi 👋</button>
+            <button id="parkMomentDismiss">Maybe later</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Leaderboard Modal -->
+      <div id="leaderboardModal" class="modal" hidden>
+        <div class="modal-backdrop"></div>
+        <div class="modal-card leaderboard-modal">
+          <h2>🏆 Today's Leaderboard</h2>
+          <div id="leaderboardRows"></div>
+          <div class="prize-section" id="prizeSection"></div>
+          <button id="leaderboardCloseBtn" class="modal-close-btn">Close</button>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages-area" id="messagesArea" role="log" aria-live="polite" aria-label="Conversation">
+        <!-- Welcome state -->
+        <div class="welcome-state" id="welcomeState">
+          <div class="welcome-emoji" id="welcomeEmoji" aria-hidden="true">🔥</div>
+          <h2 class="welcome-name" id="welcomeName">The Drill</h2>
+          <p class="welcome-desc" id="welcomeDesc">Ruthless with your goals. Relentless in your corner. Every word intense — and every word kind.</p>
+          <div class="welcome-starters" id="welcomeStarters">
+            <!-- Starter prompts injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Oracle Game UI (hidden unless oracle active) -->
+      <div class="oracle-game" id="oracleGame" hidden>
+        <div class="oracle-header">
+          <span>🔐 The Oracle</span>
+          <span class="oracle-status-live">● LIVE</span>
+        </div>
+        <div class="oracle-riddle-box">
+          <p class="oracle-riddle-label">Today's Challenge</p>
+          <p class="oracle-riddle-text" id="oracleRiddleText">Loading today's mystery...</p>
+        </div>
+        <div class="oracle-clues" id="oracleClues">
+          <p class="oracle-clue-hint">Ask The Oracle for a clue — but each one reveals more...</p>
+        </div>
+        <div class="oracle-answer-row">
+          <input type="text" id="oracleAnswerInput" class="oracle-answer-input"
+                 placeholder="Your answer..." aria-label="Submit your answer">
+          <button class="oracle-submit-btn" id="oracleSubmitBtn" aria-label="Submit answer">Submit</button>
+          <button class="oracle-clue-btn" id="oracleClueBtn" aria-label="Request a clue">Clue 🔍</button>
+        </div>
+        <div class="oracle-footer">
+          <span id="oraclePlayerCount">👥 — players today</span>
+          <span id="oracleTimer">⏱️ — remaining</span>
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="input-area" id="inputArea">
+        <div class="input-row">
+          <label for="messageInput" class="sr-only">Message your buddy</label>
+          <textarea
+            id="messageInput"
+            class="message-input"
+            placeholder="Talk to The Drill..."
+            rows="1"
+            maxlength="4000"
+            aria-label="Your message"
+            aria-describedby="inputHint"
+          ></textarea>
+          <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M18 10L2 3l4 7-4 7 16-7z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+        <p class="input-hint" id="inputHint">
+          <span id="privacyIndicator">🔒 Private — stays on your device</span>
+          <span class="char-count" id="charCount"></span>
+        </p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ─── SETUP MODAL ────────────────────────────────────────── -->
+  <div class="modal-overlay" id="setupModal" role="dialog" aria-modal="true"
+       aria-labelledby="setupModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">🔑</div>
+        <h2 id="setupModalTitle">Connect your AI</h2>
+        <p>Your key is encrypted on this device. It never leaves.</p>
+      </div>
+
+      <div class="modal-body">
+        <!-- Provider selector -->
+        <div class="form-group">
+          <label for="providerSelect" class="form-label">Provider</label>
+          <select id="providerSelect" class="form-select" aria-required="true">
+            <option value="openai">OpenAI (GPT-4o, GPT-4o mini)</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="google">Google (Gemini)</option>
+            <option value="openrouter">OpenRouter (🆓 Free Models & Open-Source)</option>
+            <!-- R2: local option injected dynamically by JS -->
+            <!-- R3: bridge option -->
+            <option value="bridge">🔗 Your PC (same Wi-Fi)</option>
+          </select>
+        </div>
+
+        <!-- R3: Bridge setup (shown when bridge selected) -->
+        <div id="bridgeSetup" class="form-group bridge-setup" hidden>
+          <label class="form-label">PC Address</label>
+          <div class="bridge-row">
+            <input id="bridgeIpInput" class="form-input" placeholder="192.168.1.x:11434" autocomplete="off" />
+            <button type="button" id="bridgeConnectBtn" class="btn-bridge-connect">Connect</button>
+          </div>
+          <span id="bridgeStatus" class="form-note bridge-status"></span>
+        </div>
+
+        <!-- Model selector -->
+        <div class="form-group">
+          <label for="modelSelect" class="form-label">Model</label>
+          <select id="modelSelect" class="form-select" aria-required="true">
+            <option value="gpt-4o-mini">GPT-4o mini (fast, cheap)</option>
+            <option value="gpt-4o">GPT-4o (smarter)</option>
+          </select>
+        </div>
+
+        <!-- API Key -->
+        <div class="form-group">
+          <label for="apiKeyInput" class="form-label">
+            API Key
+            <a href="#" id="getKeyLink" class="form-link" target="_blank" rel="noopener">Get a key →</a>
+          </label>
+          <div class="key-input-row">
+            <input type="password" id="apiKeyInput" class="form-input"
+                   placeholder="sk-..." autocomplete="off" spellcheck="false"
+                   aria-required="true" aria-describedby="keyNote">
+            <button type="button" class="toggle-visibility" id="toggleKeyVisibility"
+                    aria-label="Toggle key visibility">👁</button>
+          </div>
+          <p class="form-note" id="keyNote">
+            🔒 Encrypted with AES-256 before storage. Never logged, never synced.
+          </p>
+        </div>
+
+        <!-- Passphrase -->
+        <div class="form-group">
+          <label for="passphraseInput" class="form-label">
+            Encryption passphrase
+            <span class="form-label-sub">(locks your key — remember this)</span>
+          </label>
+          <input type="password" id="passphraseInput" class="form-input"
+                 placeholder="Choose a strong passphrase..." autocomplete="new-password"
+                 aria-required="true" aria-describedby="passphraseNote">
+          <p class="form-note" id="passphraseNote">
+            We don't store this. If you forget it, you'll re-enter your API key.
+          </p>
+        </div>
+
+        <div class="modal-error" id="setupError" role="alert" hidden></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="setupSkipBtn">Use demo mode</button>
+        <button class="btn-modal-primary" id="setupSaveBtn">
+          Save &amp; Connect
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BRIDGE PAIRING MODAL ──────────────────────────────── -->
+  <div class="modal-overlay" id="bridgePairingModal" role="dialog" aria-modal="true"
+       aria-labelledby="bridgePairingTitle" hidden>
+    <div class="modal-card bridge-pairing-modal">
+      <div class="modal-header">
+        <div class="modal-icon">🔗</div>
+        <h2 id="bridgePairingTitle">Pair with your PC</h2>
+        <p id="bridgePairingDesc">Scan this QR code with your phone to connect securely — one time, no re-scan needed.</p>
+      </div>
+      <div class="modal-body">
+        <!-- QR code is rendered here by bridge-pairing.js -->
+        <div class="qr-display-area" id="bridgeQrArea" aria-label="QR code for pairing">
+          <div class="qr-text-fallback" id="bridgeQrFallback" aria-live="polite">
+            Generating…
+          </div>
+        </div>
+        <div class="pairing-pair-id" id="bridgePairId" aria-label="Pairing ID">—</div>
+        <div class="pairing-waiting" id="bridgePairingWaiting">Waiting for phone to scan…</div>
+        <!-- Shown after phone confirms pairing -->
+        <div id="bridgePairingSuccess" hidden
+             style="color:#10b981;font-size:0.9rem;font-weight:600;text-align:center;margin-top:0.5rem;">
+          ✅ Paired! Connection is secure.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="bridgePairingCancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BRIDGE SETTINGS PANEL (inside setup modal flow) ───── -->
+  <!-- Reached via: Settings → provider = bridge → bridge settings tab -->
+  <div class="modal-overlay" id="bridgeSettingsModal" role="dialog" aria-modal="true"
+       aria-labelledby="bridgeSettingsTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">🔗</div>
+        <h2 id="bridgeSettingsTitle">Bridge Settings</h2>
+        <p>Connect your phone to your PC's local model securely.</p>
+      </div>
+      <div class="modal-body">
+
+        <!-- Connection mode -->
+        <div class="bridge-settings-section" style="padding: 0 0 1rem;">
+          <div class="bridge-settings-title">Connection Status</div>
+          <div class="bridge-status-row">
+            <span class="bridge-status-label">
+              <span class="bridge-status-dot offline" id="bridgeSettingsDot"></span>
+              <span id="bridgeSettingsModeLabel">Not connected</span>
+            </span>
+            <span id="bridgeSettingsRelayLabel"
+                  style="font-size:0.72rem;color:var(--text-faint);"></span>
+          </div>
+
+          <!-- Log summary (count only, no content) -->
+          <div class="bridge-log-summary" id="bridgeLogSummary" hidden>
+            <div class="bridge-log-stat">
+              <span class="bridge-log-stat-value" id="bridgeLogTotal">0</span>
+              <span class="bridge-log-stat-label">Total</span>
+            </div>
+            <div class="bridge-log-stat">
+              <span class="bridge-log-stat-value" id="bridgeLogSent">0</span>
+              <span class="bridge-log-stat-label">Sent</span>
+            </div>
+            <div class="bridge-log-stat">
+              <span class="bridge-log-stat-value" id="bridgeLogReceived">0</span>
+              <span class="bridge-log-stat-label">Received</span>
+            </div>
+          </div>
+          <p style="font-size:0.7rem;color:var(--text-faint);margin-top:0.5rem;">🔒 Log stores encrypted entries only — no plaintext, ever.</p>
+        </div>
+
+        <!-- LAN-direct setup -->
+        <div class="bridge-settings-section">
+          <div class="bridge-settings-title">LAN-direct (same Wi-Fi)</div>
+          <div class="bridge-row">
+            <input id="bridgeIpInput" class="form-input" placeholder="192.168.1.x:11434" autocomplete="off" />
+            <button type="button" id="bridgeConnectBtn" class="btn-bridge-connect">Connect</button>
+          </div>
+          <span id="bridgeStatus" class="form-note bridge-status"></span>
+        </div>
+
+        <!-- QR Pairing (relay) -->
+        <div class="bridge-settings-section">
+          <div class="bridge-settings-title">Secure pairing (off-network)</div>
+          <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.75rem;line-height:1.6;">
+            Pair your phone once via QR code. After pairing, messages are E2EE even off your home network.
+          </p>
+          <div class="bridge-btn-row">
+            <button class="btn-bridge-action primary" id="bridgePairQrBtn">
+              📷 Show pairing QR
+            </button>
+            <button class="btn-bridge-action danger" id="bridgeUnpairBtn">
+              Unpair
+            </button>
+          </div>
+          <div id="bridgePairedStatus"
+               style="font-size:0.75rem;color:var(--text-faint);margin-top:0.5rem;" hidden>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="bridgeSettingsCloseBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BRIDGE QUICK-COMPOSE TOAST ─────────────────────────── -->
+  <!-- Slides up when user taps "Message your buddy" -->
+  <div class="bridge-compose-toast" id="bridgeComposeToast"
+       role="dialog" aria-modal="false" aria-label="Send a note to your PC agent">
+    <div class="bridge-compose-handle" aria-hidden="true"></div>
+    <div class="bridge-compose-header">
+      <span class="bridge-compose-title">
+        📨 Message your buddy
+      </span>
+      <button class="bridge-compose-close" id="bridgeComposeClose"
+              aria-label="Close compose">✕</button>
+    </div>
+    <div class="bridge-compose-input-row">
+      <label for="bridgeComposeInput" class="sr-only">Note to PC agent</label>
+      <textarea
+        id="bridgeComposeInput"
+        class="bridge-compose-input"
+        placeholder="Drop a note for your PC agent…"
+        rows="2"
+        maxlength="2000"
+        aria-label="Note to your PC agent"
+      ></textarea>
+      <button class="bridge-compose-send" id="bridgeComposeSendBtn"
+              aria-label="Send note" disabled>
+        <svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M18 10L2 3l4 7-4 7 16-7z" fill="currentColor"/>
+        </svg>
+      </button>
+    </div>
+    <p class="bridge-compose-hint">
+      🔒 Notes are encrypted end-to-end. Your PC agent receives them — Hey Buddy never reads them.
+    </p>
+  </div>
+
+  <!-- ─── UNLOCK MODAL (passphrase to decrypt key on reload) ── -->
+  <div class="modal-overlay" id="unlockModal" role="dialog" aria-modal="true"
+       aria-labelledby="unlockModalTitle" hidden>
+    <div class="modal-card modal-card-sm">
+      <div class="modal-header">
+        <div class="modal-icon">🔓</div>
+        <h2 id="unlockModalTitle">Welcome back</h2>
+        <p>Enter your passphrase to unlock your AI key.</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="unlockPassphrase" class="form-label">Passphrase</label>
+          <input type="password" id="unlockPassphrase" class="form-input"
+                 placeholder="Your passphrase..." autocomplete="current-password"
+                 aria-required="true">
+        </div>
+        <div class="modal-error" id="unlockError" role="alert" hidden></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="unlockForgotBtn">Forgot — re-enter key</button>
+        <button class="btn-modal-primary" id="unlockBtn">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PERSONA SETTINGS PANEL ────────────────────────────── -->
+  <div class="panel-overlay" id="personaPanel" hidden role="dialog"
+       aria-labelledby="personaPanelTitle" aria-modal="true">
+    <div class="panel-card">
+      <div class="panel-header">
+        <h2 id="personaPanelTitle">Persona Settings</h2>
+        <button class="panel-close" id="personaPanelClose" aria-label="Close">✕</button>
+      </div>
+      <div class="panel-body" id="personaPanelBody">
+        <!-- Injected by JS based on active persona -->
+        <!-- R5: Saved personas list -->
+        <div id="savedPersonasList"></div>
+        <!-- R5: Create persona button -->
+        <button id="createPersonaBtn" class="create-persona-btn" hidden>➕ Create Your Buddy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PRICING & UPGRADE MODAL ────────────────────────────── -->
+  <div class="modal-overlay" id="upgradeModal" role="dialog" aria-modal="true"
+       aria-labelledby="upgradeModalTitle" hidden>
+    <div class="modal-card studio-modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">💎</div>
+        <h2 id="upgradeModalTitle">Hey Buddy Pricing & Token Credits</h2>
+        <p>Choose your preferred mode: Free Trial, Bring Your Own Key, or Credit Top-Ups.</p>
+      </div>
+      <div class="modal-body" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:1rem;">
+        <!-- Pillar 1: Free Trial -->
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;display:flex;flex-direction:column;justify-space-between;">
+          <div>
+            <h3 style="font-size:0.95rem;font-weight:700;color:#63d2ff;">🎁 Free Trial</h3>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0;">250,000 Free Token Credits upon card validation ($0 charge).</p>
+            <ul style="font-size:0.75rem;color:var(--text-faint);padding-left:1rem;margin-bottom:0.75rem;line-height:1.5;">
+              <li>🔒 Card on file prevents bot abuse</li>
+              <li>⚡ Access to Free Open Models</li>
+            </ul>
+          </div>
+          <button class="btn-modal-secondary" id="upgradeClaimTrialBtn">Validate Card & Start</button>
+        </div>
+
+        <!-- Pillar 2: BYOK Pro -->
+        <div style="background:rgba(167,139,250,0.08);border:1px solid rgba(167,139,250,0.3);border-radius:var(--r-md);padding:1rem;display:flex;flex-direction:column;justify-space-between;">
+          <div>
+            <h3 style="font-size:0.95rem;font-weight:700;color:#c4b5fd;">🔑 BYOK Pro — $19.95/mo</h3>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0;">Bring your own API key (OpenAI, Anthropic, Gemini, OpenRouter).</p>
+            <ul style="font-size:0.75rem;color:var(--text-faint);padding-left:1rem;margin-bottom:0.75rem;line-height:1.5;">
+              <li>✨ ZERO token credits deducted</li>
+              <li>⚡ Unlimited Agent Workflows & E2EE Sync</li>
+            </ul>
+          </div>
+          <button class="btn-modal-primary" id="upgradeBYOKProBtn" style="background:#a78bfa;color:#0f1220;">Subscribe $19.95/mo</button>
+        </div>
+
+        <!-- Pillar 3: Managed Credit Packages -->
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:1rem;display:flex;flex-direction:column;justify-space-between;">
+          <div>
+            <h3 style="font-size:0.95rem;font-weight:700;color:#10b981;">💳 Token Packages</h3>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin:0.4rem 0;">Top up credits for platform managed models.</p>
+            <select id="creditPackageSelect" class="form-select" style="font-size:0.75rem;margin-bottom:0.75rem;">
+              <option value="pkg-10">$10 — 5 Million Credits</option>
+              <option value="pkg-20">$20 — 12 Million Credits (+2M Bonus)</option>
+              <option value="pkg-30">$30 — 20 Million Credits (+5M Bonus)</option>
+              <option value="pkg-50">$50 — 35 Million Credits (+10M Bonus)</option>
+              <option value="pkg-100">$100 — 80 Million Credits (+30M Bonus)</option>
+            </select>
+          </div>
+          <button class="btn-modal-secondary" id="upgradeBuyCreditsBtn" style="border-color:#10b981;color:#10b981;">Buy Token Credits</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="upgradeDismissBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── CREATE PERSONA MODAL (R5) ───────────────────────────── -->
+  <div class="modal-overlay" id="createPersonaModal" role="dialog" aria-modal="true"
+       aria-labelledby="createPersonaModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">🎭</div>
+        <h2 id="createPersonaModalTitle">Create Your Buddy</h2>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="personaNameInput" class="form-label">Name</label>
+          <input id="personaNameInput" class="form-input" placeholder="Buddy name" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="personaDescInput" class="form-label">Description</label>
+          <textarea id="personaDescInput" class="form-input form-textarea"
+                    placeholder="Short description" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="personaPromptInput" class="form-label">System Prompt</label>
+          <textarea id="personaPromptInput" class="form-input form-textarea"
+                    placeholder="How should your buddy think and speak?" rows="4"></textarea>
+        </div>
+        <div id="personaCreateError" class="modal-error" hidden></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="cancelPersonaBtn">Cancel</button>
+        <button class="btn-modal-primary" id="savePersonaBtn">Save Buddy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PHASE 5: FLEET DRAWER ──────────────────────────────── -->
+  <div class="fleet-drawer" id="fleetDrawer" aria-label="Custom Agent Fleet Drawer">
+    <div class="fleet-drawer-header">
+      <div class="fleet-drawer-title">⚡ Custom Agent Fleet</div>
+      <button class="fleet-drawer-close" id="fleetDrawerCloseBtn" aria-label="Close Fleet Drawer">✕</button>
+    </div>
+    <div class="fleet-drawer-body" id="fleetDrawerBody">
+      <!-- Injected dynamically by agent-builder.js -->
+    </div>
+  </div>
+
+  <!-- ─── PHASE 5: AGENT STUDIO MODAL ───────────────────────── -->
+  <div class="modal-overlay" id="agentStudioModal" role="dialog" aria-modal="true"
+       aria-labelledby="agentStudioModalTitle" hidden>
+    <div class="modal-card studio-modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">⚡</div>
+        <h2 id="agentStudioModalTitle">Agent Studio Editor</h2>
+        <p>Define custom agent prompts, capability permissions, and workflow steps.</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="studioAgentName" class="form-label">Agent Name</label>
+          <input id="studioAgentName" class="form-input" placeholder="e.g. Data Summarizer Agent" />
+        </div>
+        <div class="form-group">
+          <label for="studioAgentDesc" class="form-label">Description</label>
+          <input id="studioAgentDesc" class="form-input" placeholder="Short summary of purpose" />
+        </div>
+        <div class="form-group">
+          <label for="studioAgentPrompt" class="form-label">System Prompt / Instructions</label>
+          <textarea id="studioAgentPrompt" class="form-input form-textarea" rows="4"
+                    placeholder="Instructions governing this sub-agent's behavior..."></textarea>
+        </div>
+        <div id="studioModalError" class="modal-error" hidden></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="studioModalCancelBtn">Cancel</button>
+        <button class="btn-modal-primary" id="studioModalSaveBtn">Save Agent Spec</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PHASE 6: AGENT MARKETPLACE MODAL ───────────────────── -->
+  <div class="modal-overlay" id="agentMarketModal" role="dialog" aria-modal="true"
+       aria-labelledby="agentMarketModalTitle" hidden>
+    <div class="modal-card market-modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">🛒</div>
+        <h2 id="agentMarketModalTitle">Agent & Workflow Marketplace</h2>
+        <p>Discover, clone, and install pre-built custom agents and automated workflows.</p>
+      </div>
+      <div class="modal-body">
+        <div class="market-search-bar">
+          <input id="marketSearchInput" class="form-input" placeholder="Search agents & workflows…" autocomplete="off" />
+        </div>
+        <div class="market-category-chips" id="marketCategoryChips">
+          <span class="chip active" data-category="All">All Items</span>
+          <span class="chip" data-category="Research">Research</span>
+          <span class="chip" data-category="Coding">Coding</span>
+          <span class="chip" data-category="Writing">Writing</span>
+          <span class="chip" data-category="Automation">Automation</span>
+        </div>
+        <div class="market-grid" id="marketGridBody">
+          <!-- Injected dynamically by agent-market.js -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="marketModalCloseBtn">Close Marketplace</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BETA ONBOARDING WIZARD MODAL ───────────────────────── -->
+  <div class="modal-overlay" id="onboardingModal" role="dialog" aria-modal="true"
+       aria-labelledby="onboardingModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">👋</div>
+        <h2 id="onboardingModalTitle">Welcome to Hey Buddy Beta!</h2>
+        <p id="onboardingStepIndicator" style="font-size:0.75rem;color:#63d2ff;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;margin-top:0.3rem;">Step 1 of 3</p>
+      </div>
+      <div class="modal-body">
+        <!-- Step 1: Mode Selection -->
+        <div id="onboardingStep1">
+          <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;color:var(--text);">How would you like to start?</h3>
+          <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;margin-bottom:1rem;">
+            You can launch immediately in <strong>Demo Mode</strong> (no API key needed), or connect your own API key for full AI completion.
+          </p>
+          <div style="display:flex;gap:0.75rem;">
+            <button class="btn-modal-primary" id="onboardDemoBtn" style="flex:1;">🚀 Launch Demo Mode</button>
+            <button class="btn-modal-secondary" id="onboardSetupBtn" style="flex:1;">🔑 Enter API Key</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Persona Selection -->
+        <div id="onboardingStep2" hidden>
+          <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;color:var(--text);">Choose Your Lead Companion</h3>
+          <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.5;margin-bottom:1rem;">
+            Select a buddy persona to start chatting. You can switch personas anytime.
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:0.6rem;font-size:0.8rem;cursor:pointer;">💙 <strong>Haven</strong><br/><span style="font-size:0.7rem;color:var(--text-faint);">Warm & Attentive</span></div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:0.6rem;font-size:0.8rem;cursor:pointer;">🔥 <strong>The Drill</strong><br/><span style="font-size:0.7rem;color:var(--text-faint);">High Energy Coach</span></div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:0.6rem;font-size:0.8rem;cursor:pointer;">🌱 <strong>Coach</strong><br/><span style="font-size:0.7rem;color:var(--text-faint);">Wellness & Health</span></div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-md);padding:0.6rem;font-size:0.8rem;cursor:pointer;">📊 <strong>The Ledger</strong><br/><span style="font-size:0.7rem;color:var(--text-faint);">Accountability</span></div>
+          </div>
+        </div>
+
+        <!-- Step 3: Studio & Fleet Overview -->
+        <div id="onboardingStep3" hidden>
+          <h3 style="font-size:0.95rem;font-weight:700;margin-bottom:0.5rem;color:var(--text);">Custom Agents & Workflow Fleet</h3>
+          <p style="font-size:0.82rem;color:var(--text-muted);line-height:1.6;">
+            Build your own sub-agents and automated workflows using <strong>⚡ Agent Studio</strong>, or install pre-built tools from the <strong>🛒 Marketplace</strong>!
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-secondary" id="onboardNextBtn">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── BETA FEEDBACK & DIAGNOSTICS MODAL ──────────────────── -->
+  <div class="modal-overlay" id="betaFeedbackModal" role="dialog" aria-modal="true"
+       aria-labelledby="betaFeedbackModalTitle" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">💬</div>
+        <h2 id="betaFeedbackModalTitle">Beta Feedback & System Diagnostics</h2>
+        <p>Report bugs, request features, or export privacy-sanitized telemetry logs.</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="betaFeedbackText" class="form-label">Your Feedback / Bug Description</label>
+          <textarea id="betaFeedbackText" class="form-input form-textarea" rows="3"
+                    placeholder="Describe what happened or suggest an improvement…"></textarea>
+        </div>
+        <div style="background:rgba(99,210,255,0.08);border:1px solid rgba(99,210,255,0.2);border-radius:var(--r-md);padding:0.75rem;margin-top:0.75rem;font-size:0.78rem;color:var(--text-muted);">
+          🔒 <strong>Privacy Guaranteed:</strong> Diagnostic exports automatically redact all API keys, passphrases, and personal chat text before generation.
+        </div>
+      </div>
+      <div class="modal-footer" style="flex-wrap:wrap;gap:0.5rem;">
+        <button class="btn-modal-secondary" id="feedbackExportFileBtn">📥 Download JSON Log</button>
+        <button class="btn-modal-secondary" id="feedbackCopyClipboardBtn">📋 Copy Log</button>
+        <button class="btn-modal-primary" id="feedbackCloseBtn">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MANDATORY SAFETY & LIABILITY WAIVER MODAL ───────────── -->
+  <div class="modal-overlay" id="safetyWaiverModal" role="dialog" aria-modal="true"
+       aria-labelledby="safetyWaiverTitle" hidden>
+    <div class="modal-card safety-waiver-card">
+      <div class="modal-header">
+        <div class="modal-icon">⚠️</div>
+        <h2 id="safetyWaiverTitle">Mandatory Safety Protocols & Legal Waiver</h2>
+        <p>You must read and accept the terms of use before utilizing Hey Buddy.</p>
+      </div>
+      <div class="modal-body">
+        <div class="waiver-box">
+          <h4>1. Assumption of Risk & Device Protection</h4>
+          <p>By using Hey Buddy, you acknowledge and agree that local AI execution involves hardware resource utilization. Hey Buddy strictly enforces device-guard protections (blocking massive 100B+ GGUF model downloads on mobile devices to prevent RAM/OOM crashes). You assume all risk associated with hardware resource allocation on your devices.</p>
+
+          <h4>2. AI Response Disclaimer</h4>
+          <p>All AI-generated responses (including Wellness, Accountability, and First-Aid guidance) are informational only and do NOT constitute professional medical, psychiatric, financial, or legal advice. Always consult certified professionals in emergencies.</p>
+
+          <h4>3. API Key Privacy & Token Responsibility</h4>
+          <p>Your API keys remain encrypted on your device. You are solely responsible for usage costs incurred on your connected model provider accounts (OpenAI, Anthropic, Google, OpenRouter).</p>
+
+          <h4>4. Message-Taker Guardrails</h4>
+          <p>Hey Buddy operates under strict capability guardrails. Agents taking notes or running cloud workflows will never execute unauthorized real-world actions without explicit capability grants.</p>
+        </div>
+        <label class="waiver-checkbox-row">
+          <input type="checkbox" id="waiverCheckbox" />
+          <span>I have read, understood, and accept all Safety Protocols, Device Restrictions, and Legal Liability Waivers.</span>
+        </label>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-primary" id="waiverAcceptBtn" disabled style="width:100%;">I Agree & Accept Terms</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── INTERACTIVE INSTRUCTIONAL GUIDE MODAL ──────────────── -->
+  <div class="modal-overlay" id="guideModal" role="dialog" aria-modal="true"
+       aria-labelledby="guideModalTitle" hidden>
+    <div class="modal-card guide-modal-card">
+      <div class="modal-header">
+        <div class="modal-icon">📖</div>
+        <h2 id="guideModalTitle">Hey Buddy Platform Guide & Safety</h2>
+        <p>Overview of capabilities, safety guardrails, and recommended protocols.</p>
+      </div>
+      <div class="modal-body guide-section-content" style="overflow-y:auto;">
+        <h3>⚡ What Hey Buddy Can Do</h3>
+        <ul class="guide-feature-list">
+          <li><strong>Custom Agent Fleet:</strong> Build specialized sub-agents with custom instructions and granted capabilities.</li>
+          <li><strong>DAG Workflows:</strong> Connect multi-step automated workflows with variable interpolation (`{{step.output}}`).</li>
+          <li><strong>Zero-Cost Free Models:</strong> Access OpenRouter Free Tier models (Llama 3.3 70B, DeepSeek R1, Gemini 2.0 Flash) for $0.</li>
+          <li><strong>E2EE Cloud Sync:</strong> Sync your agent fleet securely across desktop and mobile devices using Web Crypto.</li>
+        </ul>
+
+        <h3>🚫 What Hey Buddy Cannot Do (Guardrails)</h3>
+        <ul class="guide-feature-list">
+          <li><strong>No Unauthorized Actions:</strong> Hey Buddy is a message-taker and workflow assistant—it never executes unauthorized real-world actions.</li>
+          <li><strong>No Excessive Mobile Downloads:</strong> Device-guard protections block large 100B+ GGUF model downloads on mobile phone hardware to prevent crashes.</li>
+        </ul>
+
+        <h3>🔒 Safety & Privacy Protocols</h3>
+        <ul class="guide-feature-list">
+          <li><strong>Zero-Knowledge Encryption:</strong> All sensitive database records are encrypted client-side with AES-256-GCM.</li>
+          <li><strong>Card Validation Protection:</strong> $0 card validation stops bot spammers and guarantees trial safety.</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal-primary" id="guideCloseBtn">Close Guide</button>
+      </div>
+    </div>
+  </div>
+
+
+
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

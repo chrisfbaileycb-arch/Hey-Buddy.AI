@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hey Buddy — Five AI companions. One daily mystery. Zero data leaving your device. Your crew, always in your corner.">
+  <meta property="og:title" content="Hey Buddy — Your AI Crew">
+  <meta property="og:description" content="Five AI companions. One daily mystery. Always private. Always yours.">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+                 font-src https://fonts.gstatic.com;
+                 script-src 'self';
+                 img-src 'self' data:;
+                 connect-src 'none';">
+  <title>Hey Buddy — Your AI Crew. Always in Your Corner.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+  <!-- ─── NAV ─────────────────────────────────────────────────────────── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo" aria-label="Hey Buddy home">
+        <span class="logo-icon">👋</span>
+        <span class="logo-text">Hey Buddy</span>
+      </a>
+      <div class="nav-links">
+        <a href="#crew" class="nav-link">The Crew</a>
+        <a href="#oracle" class="nav-link">The Oracle</a>
+        <a href="#private" class="nav-link">Privacy</a>
+        <a href="#early-access" class="nav-cta" id="nav-cta">Early Access</a>
+      </div>
+      <button class="nav-hamburger" aria-label="Open menu" id="hamburger">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─────────────────────────────────────────────────────────── -->
+  <section class="hero" id="home">
+    <div class="hero-bg">
+      <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <div class="hero-gradient" aria-hidden="true"></div>
+    </div>
+
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="badge-dot"></span>
+        Coming soon — Join the waitlist
+      </div>
+
+      <h1 class="hero-headline">
+        Meet your <span class="headline-gradient">crew.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Five AI companions. One daily mystery.<br>
+        <strong>Zero data leaving your device.</strong>
+      </p>
+
+      <p class="hero-tagline">
+        The Drill pushes you. Haven holds you. The Ledger keeps you honest.<br>
+        Coach keeps you sharp. The Oracle keeps you guessing.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#early-access" class="btn btn-primary" id="hero-cta">
+          <span>Get Early Access</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </a>
+        <a href="#crew" class="btn btn-ghost">
+          Meet the crew
+        </a>
+      </div>
+
+      <div class="hero-stats" aria-label="Platform highlights">
+        <div class="stat">
+          <span class="stat-num">5</span>
+          <span class="stat-label">AI Companions</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-num">1</span>
+          <span class="stat-label">Daily Mystery</span>
+        </div>
+        <div class="stat-divider" aria-hidden="true"></div>
+        <div class="stat">
+          <span class="stat-num">0</span>
+          <span class="stat-label">Data Shared</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll" aria-hidden="true">
+      <div class="scroll-indicator"></div>
+    </div>
+  </section>
+
+  <!-- ─── CREW ──────────────────────────────────────────────────────────── -->
+  <section class="section crew-section" id="crew">
+    <div class="section-inner">
+      <div class="section-header">
+        <p class="section-eyebrow">The Crew</p>
+        <h2 class="section-title">Every buddy, built different.</h2>
+        <p class="section-desc">Five distinct personalities. Each one for a different part of your life. Hover to hear their voice.</p>
+      </div>
+
+      <div class="buddy-grid">
+
+        <!-- The Drill -->
+        <article class="buddy-card" data-buddy="drill" aria-label="The Drill buddy card" tabindex="0">
+          <div class="card-glow" style="--glow: #ff4500;" aria-hidden="true"></div>
+          <div class="card-top">
+            <div class="card-emoji" aria-hidden="true">🔥</div>
+            <div class="card-badge" style="--color: #ff6b35;">Motivator</div>
+          </div>
+          <h3 class="card-name">The Drill</h3>
+          <p class="card-tagline">No excuses. All heart.</p>
+          <p class="card-desc">Ruthless with your goals. Relentless in your corner. Every word intense — and every word kind.</p>
+          <div class="card-preview" aria-label="Sample message from The Drill">
+            <div class="preview-bubble">
+              That excuse has been in your rotation for three weeks. <strong>You're better than this. You know it. I know it. Let's GO.</strong>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="card-trait">🎯 Accountability</span>
+            <span class="card-trait">⚡ Intensity</span>
+          </div>
+        </article>
+
+        <!-- Haven -->
+        <article class="buddy-card" data-buddy="haven" aria-label="Haven buddy card" tabindex="0">
+          <div class="card-glow" style="--glow: #0099cc;" aria-hidden="true"></div>
+          <div class="card-top">
+            <div class="card-emoji" aria-hidden="true">💙</div>
+            <div class="card-badge" style="--color: #00c9ff;">Companion</div>
+          </div>
+          <h3 class="card-name">Haven</h3>
+          <p class="card-tagline">Warm. Present. Always.</p>
+          <p class="card-desc">The one you can talk to at 2am. No judgment, no agenda — just genuine presence.</p>
+          <div class="card-preview" aria-label="Sample message from Haven">
+            <div class="preview-bubble">
+              That sounds really heavy. I'm glad you shared it. You don't have to figure all of this out tonight. <strong>I'm here.</strong>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="card-trait">🤍 Empathy</span>
+            <span class="card-trait">🌙 Always on</span>
+          </div>
+        </article>
+
+        <!-- The Ledger -->
+        <article class="buddy-card" data-buddy="ledger" aria-label="The Ledger buddy card" tabindex="0">
+          <div class="card-glow" style="--glow: #64748b;" aria-hidden="true"></div>
+          <div class="card-top">
+            <div class="card-emoji" aria-hidden="true">📊</div>
+            <div class="card-badge" style="--color: #94a3b8;">Accountability</div>
+          </div>
+          <h3 class="card-name">The Ledger</h3>
+          <p class="card-tagline">Your commitments, tracked.</p>
+          <p class="card-desc">Calm. Precise. You said you'd do it. The Ledger remembers. No punishment — just honesty.</p>
+          <div class="card-preview" aria-label="Sample message from The Ledger">
+            <div class="preview-bubble">
+              Last Tuesday you committed to three things. You completed two. <strong>Let's look at the third — what got in the way?</strong>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="card-trait">📋 Tracking</span>
+            <span class="card-trait">🔍 Clarity</span>
+          </div>
+        </article>
+
+        <!-- Coach -->
+        <article class="buddy-card" data-buddy="coach" aria-label="Coach buddy card" tabindex="0">
+          <div class="card-glow" style="--glow: #059669;" aria-hidden="true"></div>
+          <div class="card-top">
+            <div class="card-emoji" aria-hidden="true">🌱</div>
+            <div class="card-badge" style="--color: #10b981;">Wellness</div>
+          </div>
+          <h3 class="card-name">Coach</h3>
+          <p class="card-tagline">Health, your way.</p>
+          <p class="card-desc">Pick your style — calm, intense, or science-based. Same knowledge, completely different energy.</p>
+          <div class="card-preview" aria-label="Sample message from Coach">
+            <div class="preview-bubble">
+              Sleep is the most underrated performance enhancer most people ignore. <strong>Let's fix that first — everything else follows.</strong>
+            </div>
+          </div>
+          <div class="card-footer">
+            <span class="card-trait">💪 Wellness</span>
+            <span class="card-trait">🧬 Science</span>
+          </div>
+        </article>
+
+        <!-- The Oracle (spans full width on wide screens) -->
+        <article class="buddy-card oracle-card" data-buddy="oracle" aria-label="The Oracle buddy card" tabindex="0">
+          <div class="card-glow oracle-glow" aria-hidden="true"></div>
+          <div class="oracle-inner">
+            <div class="card-top">
+              <div class="card-emoji" aria-hidden="true">🔐</div>
+              <div class="card-badge oracle-badge">Daily Game</div>
+            </div>
+            <h3 class="card-name">The Oracle</h3>
+            <p class="card-tagline">Every day, a new mystery.</p>
+            <p class="card-desc">One secret code. One right answer. Ask for clues — but each one costs you. One winner per day, across every player. Today's clock is ticking.</p>
+            <div class="oracle-demo">
+              <div class="oracle-message">
+                <span class="oracle-timestamp">Today's Challenge ·  active</span>
+                <p class="oracle-text">🔐 <em>"The more of me you take, the more you leave behind. What am I?"</em></p>
+              </div>
+              <div class="oracle-clue-row">
+                <div class="clue-bubble">Clue 1 available</div>
+                <div class="clue-bubble locked" aria-label="Locked">🔒 Clue 2</div>
+                <div class="clue-bubble locked" aria-label="Locked">🔒 Clue 3</div>
+              </div>
+            </div>
+          </div>
+          <div class="oracle-particles" aria-hidden="true">
+            <div class="op op1"></div><div class="op op2"></div>
+            <div class="op op3"></div><div class="op op4"></div>
+            <div class="op op5"></div><div class="op op6"></div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ORACLE FEATURE ───────────────────────────────────────────────── -->
+  <section class="section oracle-section" id="oracle">
+    <div class="section-inner oracle-split">
+      <div class="oracle-text-side">
+        <p class="section-eyebrow oracle-eyebrow">The Oracle</p>
+        <h2 class="section-title">One mystery.<br>One winner.<br>Every day.</h2>
+        <p class="section-desc">
+          At midnight, The Oracle drops a new challenge across the entire Hey Buddy network.
+          Everyone sees the same riddle. Ask for clues — but each one tips off the competition.
+          The first person to crack it wins the day.
+        </p>
+        <ul class="oracle-features">
+          <li>
+            <span class="of-icon">⏱️</span>
+            <div>
+              <strong>24-hour window</strong>
+              <span>New challenge drops every midnight</span>
+            </div>
+          </li>
+          <li>
+            <span class="of-icon">🧩</span>
+            <div>
+              <strong>Progressive clues</strong>
+              <span>Ask The Oracle — but clues get easier as they run out</span>
+            </div>
+          </li>
+          <li>
+            <span class="of-icon">🏆</span>
+            <div>
+              <strong>One winner per day</strong>
+              <span>Across all players, worldwide. First correct answer takes it.</span>
+            </div>
+          </li>
+          <li>
+            <span class="of-icon">🔒</span>
+            <div>
+              <strong>Zero personal data used</strong>
+              <span>Game state only — your conversations stay private</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="oracle-visual-side">
+        <div class="oracle-card-large">
+          <div class="ocl-header">
+            <span>🔐 The Oracle</span>
+            <span class="ocl-live">● LIVE</span>
+          </div>
+          <div class="ocl-challenge">
+            <p class="ocl-label">Today's Challenge</p>
+            <p class="ocl-riddle">"The more of me you take, the more you leave behind."</p>
+          </div>
+          <div class="ocl-clues">
+            <div class="ocl-clue unlocked">
+              <span class="clue-num">Clue 1</span>
+              <span class="clue-text">Think of a physical action, not an object.</span>
+            </div>
+            <div class="ocl-clue locked-clue">
+              <span class="clue-num">🔒 Clue 2</span>
+              <span class="clue-text">Ask The Oracle to reveal</span>
+            </div>
+          </div>
+          <div class="ocl-answer-row">
+            <input class="ocl-input" placeholder="Your answer..." aria-label="Enter your answer" readonly>
+            <button class="ocl-submit" aria-label="Submit answer" disabled>Submit</button>
+          </div>
+          <div class="ocl-footer">
+            <span>👥 247 players today</span>
+            <span>⏱️ 14h 23m remaining</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PRIVACY ──────────────────────────────────────────────────────── -->
+  <section class="section private-section" id="private">
+    <div class="section-inner">
+      <div class="section-header">
+        <p class="section-eyebrow">Privacy Promise</p>
+        <h2 class="section-title">Built different.<br>By design.</h2>
+        <p class="section-desc">
+          We built the privacy in first — not bolted on afterward.
+          Your conversations are yours. Full stop.
+        </p>
+      </div>
+
+      <div class="privacy-grid">
+        <div class="privacy-card">
+          <div class="pc-icon">✈️</div>
+          <h3 class="pc-title">Offline first</h3>
+          <p class="pc-desc">Every core feature works with airplane mode on. No network required to talk to your crew. We verify this in every build — PocketPal-style silent failures don't ship here.</p>
+        </div>
+        <div class="privacy-card">
+          <div class="pc-icon">🏠</div>
+          <h3 class="pc-title">Your device, your data</h3>
+          <p class="pc-desc">Conversations live in your device's storage, origin-scoped and encrypted. They don't touch our servers. There are no Hey Buddy servers holding your chats.</p>
+        </div>
+        <div class="privacy-card">
+          <div class="pc-icon">🔑</div>
+          <h3 class="pc-title">Keys stay local</h3>
+          <p class="pc-desc">If you connect your own AI API key, it's encrypted on your device using AES-256-GCM. It never leaves. It's never logged. We can't see it even if we wanted to.</p>
+        </div>
+        <div class="privacy-card">
+          <div class="pc-icon">☁️</div>
+          <h3 class="pc-title">API mode is visible</h3>
+          <p class="pc-desc">When a message routes to a cloud AI provider, you'll see a clear badge. No surprises. "Offline" means offline — we show you exactly what's happening, always.</p>
+        </div>
+        <div class="privacy-card">
+          <div class="pc-icon">🔗</div>
+          <h3 class="pc-title">E2EE device bridge</h3>
+          <p class="pc-desc">Connecting your phone to a home computer? Traffic is end-to-end encrypted before it leaves your device. Our relay — if used — sees only encrypted bytes. Never content.</p>
+        </div>
+        <div class="privacy-card">
+          <div class="pc-icon">💥</div>
+          <h3 class="pc-title">Nuclear delete</h3>
+          <p class="pc-desc">One button. Every conversation, every preference, every trace — gone from your device. No recovery path. Because you own your data, including the right to destroy it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── TETHER ────────────────────────────────────────────────────────── -->
+  <section class="section tether-section">
+    <div class="section-inner tether-inner">
+      <div class="tether-visual">
+        <div class="device-node phone-node">
+          <div class="device-icon">📱</div>
+          <span>Your Phone</span>
+          <span class="device-sub">Small model, always with you</span>
+        </div>
+        <div class="tether-line">
+          <div class="tether-beam" aria-hidden="true"></div>
+          <div class="tether-label">🔐 E2EE</div>
+        </div>
+        <div class="device-node desktop-node">
+          <div class="device-icon">🖥️</div>
+          <span>Your Home PC</span>
+          <span class="device-sub">Big model, richer responses</span>
+        </div>
+      </div>
+      <div class="tether-text">
+        <p class="section-eyebrow">The Bridge</p>
+        <h2 class="section-title">Your phone.<br>Your bigger brain.</h2>
+        <p class="section-desc">
+          Tether your phone to your home computer over an encrypted bridge.
+          Drive a big local model from anywhere on your network — or remotely.
+          Same UI. Same crew. Smarter answers when you need them.
+        </p>
+        <p class="tether-note">
+          🔐 End-to-end encrypted. Your home PC never needs a public IP. No cloud required.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── EARLY ACCESS ─────────────────────────────────────────────────── -->
+  <section class="section cta-section" id="early-access">
+    <div class="section-inner">
+      <div class="cta-card">
+        <div class="cta-glow" aria-hidden="true"></div>
+        <p class="section-eyebrow" style="text-align:center;">Early Access</p>
+        <h2 class="cta-title">Ready to meet your crew?</h2>
+        <p class="cta-desc">
+          Hey Buddy is in early development. Drop your email and be the first in.
+          No spam. No BS. Just a heads-up when the doors open.
+        </p>
+        <form class="cta-form" id="waitlistForm" novalidate>
+          <div class="cta-input-row">
+            <label for="email-input" class="sr-only">Your email address</label>
+            <input
+              type="email"
+              id="email-input"
+              name="email"
+              class="cta-input"
+              placeholder="your@email.com"
+              autocomplete="email"
+              required
+              aria-describedby="email-hint"
+            >
+            <button type="submit" class="btn btn-primary cta-btn" id="waitlist-submit">
+              I'm in
+            </button>
+          </div>
+          <p class="cta-hint" id="email-hint">Zero spam. Unsubscribe any time.</p>
+          <div class="cta-success" id="cta-success" aria-live="polite" hidden>
+            <span>🎉</span>
+            <p><strong>You're on the list.</strong> We'll reach out when Hey Buddy is ready for you.</p>
+          </div>
+        </form>
+        <div class="cta-badges">
+          <span class="trust-badge">🔒 No account required on launch</span>
+          <span class="trust-badge">🆓 Free tier planned</span>
+          <span class="trust-badge">📖 Open source</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span>👋</span>
+        <span>Hey Buddy</span>
+      </div>
+      <p class="footer-tagline">Your AI crew. Always in your corner.</p>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="#crew">The Crew</a>
+        <a href="#oracle">The Oracle</a>
+        <a href="#private">Privacy</a>
+        <a href="#early-access">Early Access</a>
+      </nav>
+      <p class="footer-copy">
+        Built with care. Privacy by design. MIT licensed.
+        <br>No data was harmed in the making of this product.
+      </p>
+    </div>
+  </footer>
+
+  <script src="js/landing.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "_comment": "Hey Buddy / Nexus Security Gate config. allowNet = extra hostnames permitted for outbound calls (subdomains auto-allowed). Keep this list tight — every entry widens your attack surface.",
+  "allowNet": [
+    "api.anthropic.com",
+    "api.openai.com",
+    "openrouter.ai",
+    "huggingface.co",
+    "cdn-lfs.huggingface.co",
+    "github.com",
+    "api.github.com",
+    "fonts.googleapis.com",
+    "fonts.gstatic.com",
+    "api.elevenlabs.io",
+    "generativelanguage.googleapis.com",
+    "tile.openstreetmap.org",
+    "nexus-relay.hey-buddy.local",
+    "nexus-cloud-runner.hey-buddy.local"
+  ],
+  "_relay_todo": "TODO: Replace nexus-relay.hey-buddy.local & nexus-cloud-runner.hey-buddy.local with real production hostnames before deploy."
+}

@@ -1,0 +1,95 @@
+/* ============================================================
+   guide.css — Hey Buddy Mandatory Safety Waiver & Instructional Guide
+   ============================================================ */
+
+.btn-guide-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--r-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  cursor: pointer;
+  transition: background var(--t-fast);
+  white-space: nowrap;
+}
+
+.btn-guide-open:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.safety-waiver-card {
+  max-width: 580px;
+  width: 95vw;
+}
+
+.waiver-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 1rem;
+  max-height: 240px;
+  overflow-y: auto;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.waiver-box h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 0.75rem;
+  margin-bottom: 0.3rem;
+}
+
+.waiver-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.waiver-checkbox-row input {
+  margin-top: 0.2rem;
+  accent-color: #a78bfa;
+}
+
+.guide-modal-card {
+  max-width: 760px;
+  width: 95vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-section-content {
+  font-size: 0.83rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.guide-section-content h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+}
+
+.guide-feature-list {
+  padding-left: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.guide-feature-list li {
+  margin-bottom: 0.4rem;
+}
