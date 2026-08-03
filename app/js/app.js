@@ -167,6 +167,9 @@ const dom = {
   unlockForgotBtn:   $('unlockForgotBtn'),
   accessIdBypassBtn: $('accessIdBypassBtn'),
   unlockAccessIdBtn: $('unlockAccessIdBtn'),
+  accessIdInput:     $('accessIdInput'),
+  accessIdSubmitBtn: $('accessIdSubmitBtn'),
+  waiverBypassBtn:   $('waiverBypassBtn'),
   // Persona panel
   personaPanel:      $('personaPanel'),
   personaPanelClose: $('personaPanelClose'),
@@ -1758,8 +1761,30 @@ function wireEvents() {
   });
 
   // Setup: Access ID Tester Bypass
+  if (dom.accessIdSubmitBtn) {
+    dom.accessIdSubmitBtn.addEventListener('click', async () => {
+      const code = dom.accessIdInput?.value?.trim() || 'TESTER_PASS';
+      await activateAccessIdBypass(code);
+    });
+  }
+  if (dom.accessIdInput) {
+    dom.accessIdInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        dom.accessIdSubmitBtn.click();
+      }
+    });
+  }
   if (dom.accessIdBypassBtn) {
     dom.accessIdBypassBtn.addEventListener('click', async () => {
+      const code = prompt('Enter your Access ID for Tester Bypass:', 'TESTER_PASS');
+      if (code) {
+        await activateAccessIdBypass(code);
+      }
+    });
+  }
+  if (dom.waiverBypassBtn) {
+    dom.waiverBypassBtn.addEventListener('click', async () => {
       const code = prompt('Enter your Access ID for Tester Bypass:', 'TESTER_PASS');
       if (code) {
         await activateAccessIdBypass(code);
