@@ -1,0 +1,24 @@
+[sanity] Test 1: Web App Shell Loading & Welcome Screen
+Viewport: desktop
+Description: Verify the Hey Buddy web app shell loads and presents the active Lead Companion persona welcome screen.
+Steps:
+1. Open the application landing page / app shell.
+2. Verify persona emoji and name are displayed.
+Expected Outcome: The active persona welcome card renders cleanly with starter prompt buttons.
+
+Test 2: Persona Switching & Voice Settings
+Viewport: mobile
+Description: Verify persona switching between Haven, The Drill, Coach, and The Ledger on mobile form factor.
+Steps:
+1. Tap the sidebar persona selector.
+2. Select Coach.
+Expected Outcome: The theme color updates to green (#10b981) and Coach's profile displays.
+
+Test 3: Mandatory Safety & Liability Waiver Modal
+Viewport: desktop
+Description: Verify mandatory safety waiver modal displays on first run and enforces checkbox acceptance.
+Steps:
+1. Open app on first launch.
+2. Verify I Agree button is disabled until checkbox is checked.
+3. Check the safety protocols agreement box.
+Expected Outcome: The accept button enables and closing the modal unlocks app access.

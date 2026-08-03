@@ -165,6 +165,8 @@ const dom = {
   unlockError:       $('unlockError'),
   unlockBtn:         $('unlockBtn'),
   unlockForgotBtn:   $('unlockForgotBtn'),
+  accessIdBypassBtn: $('accessIdBypassBtn'),
+  unlockAccessIdBtn: $('unlockAccessIdBtn'),
   // Persona panel
   personaPanel:      $('personaPanel'),
   personaPanelClose: $('personaPanelClose'),
@@ -374,6 +376,34 @@ const PERSONA_META = {
   },
 };
 
+// ── Access ID Tester Bypass Helper ────────────────────────────
+async function activateAccessIdBypass(accessId = 'TESTER_PASS') {
+  try {
+    await acceptSafetyWaiver();
+  } catch (e) {}
+  try {
+    await markOnboardingComplete();
+  } catch (e) {}
+
+  state.isDemo = false;
+  state.apiConfig = {
+    provider: 'openrouter',
+    model: 'meta-llama/llama-3.3-70b-instruct:free'
+  };
+  state.apiKeyDecrypted = 'openrouter-free-tier';
+  state.tierId = 'pro';
+
+  // Hide all login / onboarding / safety modals
+  if (dom.setupModal) hideModal(dom.setupModal);
+  if (dom.unlockModal) hideModal(dom.unlockModal);
+  if (dom.safetyWaiverModal) hideModal(dom.safetyWaiverModal);
+  if (dom.onboardingModal) hideModal(dom.onboardingModal);
+
+  setConnectionStatus('connected', `🔑 Access ID Authorized (${accessId.toUpperCase()})`);
+  dom.body.dataset.tier = 'pro';
+  console.log(`[Bypass] Activated Access ID ${accessId} — full tester access enabled.`);
+}
+
 // ── Initialization ───────────────────────────────────────────
 async function init() {
   await openDB();
@@ -386,6 +416,14 @@ async function init() {
 
   // First-run sandbox notice (shows once, then never again)
   await showSandboxNotice();
+
+  // Check URL query parameter access ID / tester bypass (?access_id=... or ?bypass=true)
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlAccessId = urlParams.get('access_id') || urlParams.get('accessId') || (urlParams.has('bypass') ? 'BYPASS_ACTIVE' : null);
+  if (urlAccessId) {
+    await activateAccessIdBypass(urlAccessId);
+    return;
+  }
 
   // Mandatory Safety & Legal Liability Waiver check (Must accept before onboarding/app access)
   const acceptedWaiver = await hasAcceptedSafetyWaiver();
@@ -1719,6 +1757,16 @@ function wireEvents() {
     }
   });
 
+  // Setup: Access ID Tester Bypass
+  if (dom.accessIdBypassBtn) {
+    dom.accessIdBypassBtn.addEventListener('click', async () => {
+      const code = prompt('Enter your Access ID for Tester Bypass:', 'TESTER_PASS');
+      if (code) {
+        await activateAccessIdBypass(code);
+      }
+    });
+  }
+
   // Setup: Demo mode
   dom.setupSkipBtn.addEventListener('click', () => {
     enableDemoMode();
@@ -1754,6 +1802,15 @@ function wireEvents() {
     hideModal(dom.unlockModal);
     showModal(dom.setupModal);
   });
+
+  if (dom.unlockAccessIdBtn) {
+    dom.unlockAccessIdBtn.addEventListener('click', async () => {
+      const code = prompt('Enter your Access ID for Tester Bypass:', 'TESTER_PASS');
+      if (code) {
+        await activateAccessIdBypass(code);
+      }
+    });
+  }
 
   // Oracle clue button
   dom.oracleClueBtn.addEventListener('click', () => {
