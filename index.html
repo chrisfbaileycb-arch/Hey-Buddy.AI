@@ -32,7 +32,7 @@
         <a href="#crew" class="nav-link">The Crew</a>
         <a href="#oracle" class="nav-link">The Oracle</a>
         <a href="#private" class="nav-link">Privacy</a>
-        <a href="#early-access" class="nav-cta" id="nav-cta">Early Access</a>
+        <a href="app/index.html?access_id=TESTER_PASS" class="nav-cta" id="nav-cta" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">🚀 Launch Web App</a>
       </div>
       <button class="nav-hamburger" aria-label="Open menu" id="hamburger">
         <span></span><span></span><span></span>
@@ -67,16 +67,32 @@
         Coach keeps you sharp. The Oracle keeps you guessing.
       </p>
 
-      <div class="hero-actions">
-        <a href="#early-access" class="btn btn-primary" id="hero-cta">
-          <span>Get Early Access</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </a>
-        <a href="#crew" class="btn btn-ghost">
-          Meet the crew
-        </a>
+      <div class="hero-actions" style="flex-direction: column; align-items: center; gap: 1rem;">
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;">
+          <a href="app/index.html?access_id=TESTER_PASS" class="btn btn-primary" id="hero-cta" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); padding: 0.85rem 1.75rem; font-size: 1rem; font-weight: 700;">
+            <span>🚀 Launch App (Tester Access)</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </a>
+          <a href="app/index.html" class="btn btn-ghost">
+            Launch App Shell 📱
+          </a>
+        </div>
+
+        <!-- Tester Access ID Quick Launch Card -->
+        <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.35); border-radius: 14px; padding: 1rem 1.25rem; max-width: 480px; width: 100%; text-align: left; margin-top: 0.5rem;">
+          <label style="color: #a5b4fc; font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 0.4rem;">
+            🔑 Tester Access ID (Instant Login Bypass)
+          </label>
+          <form onsubmit="event.preventDefault(); const code = document.getElementById('heroAccessIdInput').value.trim() || 'TESTER_PASS'; window.location.href = 'app/index.html?access_id=' + encodeURIComponent(code);" style="display: flex; gap: 0.5rem;">
+            <input type="text" id="heroAccessIdInput" value="TESTER_PASS" placeholder="Enter Access ID" style="flex: 1; background: rgba(15, 18, 32, 0.9); border: 1px solid #6366f1; border-radius: 8px; color: #fff; padding: 0.5rem 0.75rem; font-weight: 600; font-size: 0.9rem;" />
+            <button type="submit" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; border-radius: 8px; padding: 0.5rem 1rem; font-weight: 700; font-size: 0.85rem; cursor: pointer; white-space: nowrap;">Bypass &amp; Launch 🚀</button>
+          </form>
+          <span style="font-size: 0.72rem; color: #94a3b8; margin-top: 0.35rem; display: block;">
+            ⚡ Instantly opens Hey Buddy with passwordless login &amp; free open-source models ready.
+          </span>
+        </div>
       </div>
 
       <div class="hero-stats" aria-label="Platform highlights">
