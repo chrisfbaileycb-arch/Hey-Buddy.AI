@@ -266,7 +266,6 @@ const dom = {
   onboardingStepIndicator: $('onboardingStepIndicator'),
   onboardDemoBtn:          $('onboardDemoBtn'),
   onboardSetupBtn:         $('onboardSetupBtn'),
-  onboardSetupBtn:         $('onboardSetupBtn'),
   onboardNextBtn:          $('onboardNextBtn'),
   // Pricing & Upgrades
   upgradeClaimTrialBtn:    $('upgradeClaimTrialBtn'),
@@ -1456,7 +1455,7 @@ function wireEvents() {
 
   // R4: Upgrade modal events
   dom.upgradeDismissBtn.addEventListener('click', () => hideModal(dom.upgradeModal));
-  dom.upgradeStartTrialBtn.addEventListener('click', () => {
+  dom.upgradeStartTrialBtn?.addEventListener('click', () => {
     // Placeholder — link to payment flow when available
     showToast('Trial sign-up coming soon!');
   });
