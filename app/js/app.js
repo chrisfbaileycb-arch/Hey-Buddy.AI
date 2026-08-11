@@ -30,7 +30,7 @@ import { detectDeviceKind, preflight }
 import { getModel, MAX_DOWNLOAD_MB } from './model-catalog.js';
 import { reviewPersona, composeSystemPrompt as guardCompose }
   from './persona-guard.js';
-import { savePersona, loadPersona, listPersonas, exportPersona, importPersona, clearServerCache, OFFLOAD_NOTICE }
+import { savePersona, loadPersona, listPersonas, deletePersona, exportPersona, importPersona, clearServerCache, OFFLOAD_NOTICE }
   from './persona-vault.js';
 import { probePc, pcChat, pokeAgentTask, relayChat }
   from './bridge-client.js';
