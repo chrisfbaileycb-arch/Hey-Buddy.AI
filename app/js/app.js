@@ -199,6 +199,9 @@ const dom = {
   bridgeIpInput:           $('bridgeIpInput'),
   bridgeConnectBtn:        $('bridgeConnectBtn'),
   bridgeStatus:            $('bridgeStatus'),
+  bridgeSettingsIpInput:   $('bridgeSettingsIpInput'),
+  bridgeSettingsConnectBtn:$('bridgeSettingsConnectBtn'),
+  bridgeSettingsStatus:    $('bridgeSettingsStatus'),
   bridgePairQrBtn:         $('bridgePairQrBtn'),
   bridgeUnpairBtn:         $('bridgeUnpairBtn'),
   bridgePairedStatus:      $('bridgePairedStatus'),
@@ -1315,12 +1318,12 @@ function wireEvents() {
     dom.voiceToggleBtn.classList.toggle('voice-active', state.voiceEnabled);
   });
 
-  // R3: Bridge connect (LAN-direct)
-  dom.bridgeConnectBtn.addEventListener('click', async () => {
-    const addr = dom.bridgeIpInput.value.trim();
+  // R3: Bridge connect (LAN-direct) — shared by setup modal and bridge settings modal
+  async function connectLanBridge(inputEl, statusEl, btnEl) {
+    const addr = inputEl.value.trim();
     if (!addr) return;
-    dom.bridgeStatus.textContent = 'Connecting…';
-    dom.bridgeConnectBtn.disabled = true;
+    statusEl.textContent = 'Connecting…';
+    btnEl.disabled = true;
     try {
       const result = await probePc('http://' + addr + '/v1');
       if (result?.online) {
@@ -1328,19 +1331,26 @@ function wireEvents() {
         state.relayMode  = false;
         setBridgeConnected('lan');
         setConnectionStatus('connected', '💻 Your PC (LAN)');
-        dom.bridgeStatus.textContent = '✅ Connected!';
-        dom.bridgeStatus.style.color = '#10b981';
+        statusEl.textContent = '✅ Connected!';
+        statusEl.style.color = '#10b981';
       } else {
-        dom.bridgeStatus.textContent = "Can't reach that address — check Wi-Fi";
-        dom.bridgeStatus.style.color = '#fca5a5';
+        statusEl.textContent = "Can't reach that address — check Wi-Fi";
+        statusEl.style.color = '#fca5a5';
       }
     } catch {
-      dom.bridgeStatus.textContent = "Can't reach that address — check Wi-Fi";
-      dom.bridgeStatus.style.color = '#fca5a5';
+      statusEl.textContent = "Can't reach that address — check Wi-Fi";
+      statusEl.style.color = '#fca5a5';
     } finally {
-      dom.bridgeConnectBtn.disabled = false;
+      btnEl.disabled = false;
     }
-  });
+  }
+
+  dom.bridgeConnectBtn.addEventListener('click', () =>
+    connectLanBridge(dom.bridgeIpInput, dom.bridgeStatus, dom.bridgeConnectBtn));
+  if (dom.bridgeSettingsConnectBtn) {
+    dom.bridgeSettingsConnectBtn.addEventListener('click', () =>
+      connectLanBridge(dom.bridgeSettingsIpInput, dom.bridgeSettingsStatus, dom.bridgeSettingsConnectBtn));
+  }
 
   // Phase 4: Open bridge settings when bridge is selected in provider picker
   dom.providerSelect.addEventListener('change', () => {
