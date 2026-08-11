@@ -15,7 +15,7 @@
   <title>Hey Buddy</title>
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0f1220" />
+  <meta name="theme-color" content="#0f1220" id="themeColorMeta" />
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -27,6 +27,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/theme-customization.css">
   <link rel="stylesheet" href="css/sandbox-notice.css">
   <link rel="stylesheet" href="css/hunt.css" />
   <link rel="stylesheet" href="css/bridge.css" />
@@ -914,9 +915,31 @@
     </div>
   </div>
 
-
-
-
+  <!-- Theme & Customization -->
+  <script type="module">
+    import { initThemeManager, applyTheme, toggleTheme, watchSystemTheme } from './js/theme-manager.js';
+    
+    // Initialize theme system when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      initThemeManager();
+      watchSystemTheme();
+      
+      // Update theme color meta tag dynamically
+      const observer = new MutationObserver(() => {
+        const themeColorMeta = document.getElementById('themeColorMeta');
+        const isLight = document.body.getAttribute('data-theme') === 'light';
+        if (themeColorMeta) {
+          themeColorMeta.setAttribute('content', isLight ? '#f8f9ff' : '#0f1220');
+        }
+      });
+      
+      observer.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['data-theme']
+      });
+    });
+  </script>
+  
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
