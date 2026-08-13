@@ -17,9 +17,7 @@ import { registerServiceWorker, setupInstall, promptInstall, IOS_INSTALL_HINT }
   from './pwa-install.js';
 import { showSandboxNotice }
   from './sandbox-notice.js';
-import { TIERS, effectiveLimits, can, shouldPersist }
-  from './tier-config.js';
-import { checkVoice, recordVoiceUsage }
+import { checkVoice, recordVoiceUsage, shouldPersist }
   from './voice-meter.js';
 import { speak as ttsSpeak }
   from './tts-engine.js';

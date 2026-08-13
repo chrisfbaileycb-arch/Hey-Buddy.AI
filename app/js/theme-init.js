@@ -5,21 +5,27 @@
  */
 import { initThemeManager, watchSystemTheme } from './theme-manager.js';
 
+/** Keep the browser/status-bar theme-color meta in sync with the active theme. */
+function syncThemeColor() {
+  const themeColorMeta = document.getElementById('themeColorMeta');
+  if (!themeColorMeta) return;
+  const isLight = document.body.getAttribute('data-theme') === 'light';
+  themeColorMeta.setAttribute('content', isLight ? '#f8f9ff' : '#0f1220');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initThemeManager();
   watchSystemTheme();
 
-  // Update theme color meta tag dynamically
-  const observer = new MutationObserver(() => {
-    const themeColorMeta = document.getElementById('themeColorMeta');
-    const isLight = document.body.getAttribute('data-theme') === 'light';
-    if (themeColorMeta) {
-      themeColorMeta.setAttribute('content', isLight ? '#f8f9ff' : '#0f1220');
-    }
-  });
-
+  // React to any later theme change.
+  const observer = new MutationObserver(syncThemeColor);
   observer.observe(document.body, {
     attributes: true,
     attributeFilter: ['data-theme']
   });
+
+  // Sync once now: initThemeManager() already applied the saved theme before
+  // this observer existed, and MutationObserver never replays that initial
+  // mutation — so without this call a restored light theme keeps a dark bar.
+  syncThemeColor();
 });
