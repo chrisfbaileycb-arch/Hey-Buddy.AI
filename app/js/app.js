@@ -40,7 +40,7 @@ import { loadFleetAgents, saveFleetAgent, loadFleetWorkflows, saveFleetWorkflow,
   from './agent-builder.js';
 import { executeCloudWorkflow }
   from './cloud-runner.js';
-import { streamModelCompletion, PROVIDERS as CLOUD_PROVIDERS }
+import { streamModelCompletion }
   from './cloud-model-adapter.js';
 import { pushLocalToCloud, getCloudSyncStatus }
   from './cloud-sync.js';
