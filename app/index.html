@@ -28,6 +28,7 @@
   <!-- Styles -->
   <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="css/theme-customization.css">
+  <link rel="stylesheet" href="css/admin-panel.css">
   <link rel="stylesheet" href="css/sandbox-notice.css">
   <link rel="stylesheet" href="css/hunt.css" />
   <link rel="stylesheet" href="css/bridge.css" />
@@ -197,10 +198,16 @@
           <button class="header-action-btn" id="personaSettingsBtn" aria-label="Persona settings">
             🎛️
           </button>
+          <!-- Theme picker -->
+          <button class="header-action-btn" id="themeBtn" aria-label="Change theme"
+                  title="Change theme">🌗</button>
+          <!-- Operator console (passphrase-gated local key vault) -->
+          <button class="header-action-btn" id="adminPanelBtn" aria-label="Admin panel"
+                  title="Admin panel — manage keys &amp; model visibility">🔐</button>
         </div>
       </header>
 
-      <!-- First Responder Safety Banner (only visible on first-responder persona) -->
+  <!-- First Responder Safety Banner (only visible on first-responder persona) -->
       <div class="safety-banner" id="safetyBanner" hidden role="alert" aria-live="assertive">
         <span class="safety-icon">🚨</span>
         <div class="safety-text">
@@ -314,7 +321,60 @@
     </main>
   </div>
 
-  <!-- ─── SETUP MODAL ────────────────────────────────────────── -->
+  <!-- ─── THEME PICKER ──────────────────────────────────────── -->
+    <div class="modal-overlay" id="themeModal" role="dialog" aria-modal="true"
+         aria-labelledby="themeModalTitle" hidden>
+      <div class="modal-card modal-card-sm theme-card">
+        <div class="modal-header">
+          <div class="modal-icon">🎨</div>
+          <h2 id="themeModalTitle">Theme</h2>
+          <p>Pick the look that suits you.</p>
+        </div>
+        <div class="modal-body">
+          <div class="theme-grid" role="group" aria-label="Theme choices">
+            <button class="theme-option" data-theme="dark" type="button">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#0f0f1a,#1a1a2e);"></span>
+              <span class="theme-option-name">🌙 Dark</span>
+            </button>
+            <button class="theme-option" data-theme="light" type="button">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#f8f9ff,#e8ecff);"></span>
+              <span class="theme-option-name">☀️ Light</span>
+            </button>
+            <button class="theme-option" data-theme="pastel" type="button">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#fdf6fb,#eef4ff);"></span>
+              <span class="theme-option-name">🌸 Pastel</span>
+            </button>
+            <button class="theme-option" data-theme="earthy" type="button">
+              <span class="theme-swatch" style="background:linear-gradient(135deg,#f5efe3,#e8dcc6);"></span>
+              <span class="theme-option-name">🌾 Earthy</span>
+            </button>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-modal-secondary" id="themeModalClose" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── ADMIN PANEL (operator console) ─────────────────────── -->
+    <!-- Passphrase-gated local key vault. The vault renders metadata only;
+         secret values are never painted into the DOM. -->
+    <div class="modal-overlay" id="adminPanelModal" role="dialog" aria-modal="true"
+         aria-labelledby="adminPanelTitle" hidden>
+      <div class="modal-card admin-card">
+        <div class="modal-header">
+          <div class="modal-icon">🔐</div>
+          <h2 id="adminPanelTitle">Admin Panel</h2>
+          <p>Manage provider keys and model visibility for this device.</p>
+        </div>
+        <div class="modal-body" id="adminPanelBody"></div>
+        <div class="modal-footer">
+          <button class="btn-modal-secondary" id="adminPanelClose" type="button">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETUP MODAL ────────────────────────────────────────── -->
   <div class="modal-overlay" id="setupModal" role="dialog" aria-modal="true"
        aria-labelledby="setupModalTitle" hidden>
     <div class="modal-card">
@@ -367,10 +427,23 @@
         <!-- Model selector -->
         <div class="form-group">
           <label for="modelSelect" class="form-label">Model</label>
+          <!-- Free / paid visibility. Filters the picker; a model you already
+               selected stays selected even if its group is hidden. -->
+          <div class="model-tier-toggles" role="group" aria-label="Model cost filter">
+            <label class="tier-toggle" id="tierToggleFreeWrap">
+              <input type="checkbox" id="tierToggleFree" checked>
+              <span>Free <span class="tier-count" id="tierCountFree">0</span></span>
+            </label>
+            <label class="tier-toggle" id="tierTogglePaidWrap">
+              <input type="checkbox" id="tierTogglePaid" checked>
+              <span>Paid <span class="tier-count" id="tierCountPaid">0</span></span>
+            </label>
+          </div>
           <select id="modelSelect" class="form-select" aria-required="true">
             <option value="gpt-4o-mini">GPT-4o mini (fast, cheap)</option>
             <option value="gpt-4o">GPT-4o (smarter)</option>
           </select>
+          <p class="admin-hint" id="modelTierWarning" hidden></p>
         </div>
 
         <!-- API Key -->
@@ -494,10 +567,10 @@
         <div class="bridge-settings-section">
           <div class="bridge-settings-title">LAN-direct (same Wi-Fi)</div>
           <div class="bridge-row">
-            <input id="bridgeIpInput" class="form-input" placeholder="192.168.1.x:11434" autocomplete="off" />
-            <button type="button" id="bridgeConnectBtn" class="btn-bridge-connect">Connect</button>
+            <input id="bridgeSettingsIpInput" class="form-input" placeholder="192.168.1.x:11434" autocomplete="off" aria-label="PC address" />
+            <button type="button" id="bridgeSettingsConnectBtn" class="btn-bridge-connect">Connect</button>
           </div>
-          <span id="bridgeStatus" class="form-note bridge-status"></span>
+          <span id="bridgeSettingsStatus" class="form-note bridge-status"></span>
         </div>
 
         <!-- QR Pairing (relay) -->
@@ -915,31 +988,8 @@
     </div>
   </div>
 
-  <!-- Theme & Customization -->
-  <script type="module">
-    import { initThemeManager, applyTheme, toggleTheme, watchSystemTheme } from './js/theme-manager.js';
-    
-    // Initialize theme system when DOM is ready
-    document.addEventListener('DOMContentLoaded', () => {
-      initThemeManager();
-      watchSystemTheme();
-      
-      // Update theme color meta tag dynamically
-      const observer = new MutationObserver(() => {
-        const themeColorMeta = document.getElementById('themeColorMeta');
-        const isLight = document.body.getAttribute('data-theme') === 'light';
-        if (themeColorMeta) {
-          themeColorMeta.setAttribute('content', isLight ? '#f8f9ff' : '#0f1220');
-        }
-      });
-      
-      observer.observe(document.body, {
-        attributes: true,
-        attributeFilter: ['data-theme']
-      });
-    });
-  </script>
-  
+  <!-- Theme & Customization (external file — CSP script-src 'self' blocks inline scripts) -->
+  <script type="module" src="js/theme-init.js"></script>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

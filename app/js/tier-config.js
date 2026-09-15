@@ -52,6 +52,40 @@ export const TIERS = {
 };
 
 /**
+ * Effective runtime limits for a tier.
+ *
+ * This is the single source the app queries at runtime for voice budgets and
+ * whether a conversation is persisted. It's derived from the TIERS table above
+ * so the two can never drift. Voice is self-hosted (Chatterbox/Kokoro), so the
+ * character budgets are fairness / server-load caps, not per-API billing.
+ *
+ * @param {{ tierId?: string, activeSlots?: number }} [opts]
+ * @returns {{
+ *   voiceCharBudget: number,
+ *   voiceBudgetWindow: 'daily'|'monthly'|'trial'|'lifetime',
+ *   voiceOnStarterPersonasOnly: boolean,
+ *   saveConversations: boolean,
+ *   customPersonaSlots: number,
+ * }}
+ */
+export function effectiveLimits({ tierId = 'free', activeSlots = 0 } = {}) {
+  const tier = TIERS[tierId] || TIERS.free;
+  const paid = tier.isPaid === true;
+
+  return {
+    // Members get a generous monthly budget; free gets a real preview.
+    voiceCharBudget:            paid ? 2_000_000 : 8_000,
+    voiceBudgetWindow:          paid ? 'monthly'  : 'lifetime',
+    // On the free tier, voice is limited to the built-in starter buddies.
+    voiceOnStarterPersonasOnly: !paid,
+    // Free tier stays ephemeral (privacy + cost); paid tiers save history.
+    saveConversations:          paid,
+    customPersonaSlots:         tier.customPersonaSlots ?? 1,
+    activeSlots,
+  };
+}
+
+/**
  * Deduct Token Credits from a user's credit balance.
  * BYPASS RULE: If user is using their OWN API Key (BYOK), skip credit deduction entirely!
  *

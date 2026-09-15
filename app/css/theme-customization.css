@@ -48,6 +48,13 @@
   --c-oracle:      #f59e0b;
   --c-first:       #ef4444;
   
+  /* Chrome surfaces (sidebar / header / input bar).
+     Kept as variables so every theme — not just light/dark — can restyle the
+     app frame without additional override selectors. */
+  --chrome-sidebar: rgba(22, 22, 42, 0.85);
+  --chrome-header:  rgba(15, 15, 26, 0.7);
+  --chrome-input:   rgba(15, 15, 26, 0.8);
+
   /* Glassmorphism */
   --glass-bg: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.15);
@@ -93,6 +100,47 @@ body[data-theme="light"] {
   --text-faint: var(--light-text-faint);
   --glass-bg: var(--light-glass-bg);
   --glass-border: var(--light-glass-border);
+  --chrome-sidebar: rgba(255, 255, 255, 0.85);
+  --chrome-header:  rgba(255, 255, 255, 0.7);
+  --chrome-input:   rgba(255, 255, 255, 0.8);
+}
+
+/* ── Pastel — soft, airy, low-contrast accent ────────────── */
+body[data-theme="pastel"] {
+  --bg: #fdf6fb;
+  --bg-2: #ffffff;
+  --bg-gradient: linear-gradient(135deg, #fdf6fb 0%, #eef4ff 100%);
+  --bg-card: rgba(167, 139, 250, 0.10);
+  --bg-card-hover: rgba(167, 139, 250, 0.18);
+  --border: rgba(167, 139, 250, 0.28);
+  --border-hover: rgba(167, 139, 250, 0.45);
+  --text: #4a3f5c;
+  --text-muted: rgba(74, 63, 92, 0.68);
+  --text-faint: rgba(74, 63, 92, 0.42);
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(167, 139, 250, 0.25);
+  --chrome-sidebar: rgba(255, 255, 255, 0.82);
+  --chrome-header:  rgba(253, 246, 251, 0.78);
+  --chrome-input:   rgba(255, 255, 255, 0.84);
+}
+
+/* ── Earthy — warm, grounded, sand and clay ──────────────── */
+body[data-theme="earthy"] {
+  --bg: #f5efe3;
+  --bg-2: #fbf6ec;
+  --bg-gradient: linear-gradient(135deg, #f5efe3 0%, #e8dcc6 100%);
+  --bg-card: rgba(120, 90, 60, 0.09);
+  --bg-card-hover: rgba(120, 90, 60, 0.16);
+  --border: rgba(120, 90, 60, 0.24);
+  --border-hover: rgba(120, 90, 60, 0.40);
+  --text: #3d3226;
+  --text-muted: rgba(61, 50, 38, 0.70);
+  --text-faint: rgba(61, 50, 38, 0.45);
+  --glass-bg: rgba(255, 252, 245, 0.55);
+  --glass-border: rgba(120, 90, 60, 0.22);
+  --chrome-sidebar: rgba(251, 246, 236, 0.85);
+  --chrome-header:  rgba(245, 239, 227, 0.78);
+  --chrome-input:   rgba(251, 246, 236, 0.86);
 }
 
 /* Persona themes */
@@ -138,11 +186,7 @@ body[data-user-bg="sunset"] {
 /* Sidebar with glassmorphism */
 .sidebar {
   backdrop-filter: blur(var(--glass-blur));
-  background: rgba(22, 22, 42, 0.85);
-}
-
-body[data-theme="light"] .sidebar {
-  background: rgba(255, 255, 255, 0.85);
+  background: var(--chrome-sidebar);
 }
 
 /* Enhanced wordmark */
@@ -188,13 +232,9 @@ body[data-theme="light"] .sidebar {
 
 /* Chat header with glassmorphism */
 .chat-header {
-  background: rgba(15, 15, 26, 0.7);
+  background: var(--chrome-header);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-}
-
-body[data-theme="light"] .chat-header {
-  background: rgba(255, 255, 255, 0.7);
 }
 
 .chat-header-name {
@@ -225,11 +265,6 @@ body[data-theme="light"] .chat-header {
   border: 1px solid var(--glass-border);
 }
 
-body[data-theme="light"] .message.buddy-msg .message-bubble {
-  background: var(--light-glass-bg);
-  border-color: var(--light-glass-border);
-}
-
 .message.user-msg .message-bubble {
   background: var(--gradient-warm);
   box-shadow: 0 4px 16px var(--persona-glow);
@@ -237,13 +272,9 @@ body[data-theme="light"] .message.buddy-msg .message-bubble {
 
 /* Input area */
 .input-area {
-  background: rgba(15, 15, 26, 0.8);
+  background: var(--chrome-input);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-}
-
-body[data-theme="light"] .input-area {
-  background: rgba(255, 255, 255, 0.8);
 }
 
 .send-btn {
@@ -265,6 +296,53 @@ body[data-theme="light"] .input-area {
 
 .modal-card {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Theme picker ────────────────────────────────────────── */
+.theme-card { max-width: 380px; }
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border-radius: var(--r-md);
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: all 150ms ease;
+  font: inherit;
+  color: var(--text);
+}
+
+.theme-option:hover {
+  border-color: var(--persona);
+  transform: translateY(-2px);
+}
+
+.theme-option.active {
+  border-color: var(--persona);
+  box-shadow: 0 4px 14px var(--persona-glow);
+}
+
+.theme-swatch {
+  display: block;
+  height: 42px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+
+.theme-option-name {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-align: center;
 }
 
 /* Utility classes */

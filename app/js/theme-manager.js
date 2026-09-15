@@ -26,7 +26,7 @@ function loadUserPreferences() {
     const saved = localStorage.getItem('hb_theme_prefs_v1');
     if (saved) {
       const prefs = JSON.parse(saved);
-      themeState.currentTheme = prefs.theme || 'dark';
+      themeState.currentTheme = normalizeTheme(prefs.theme);
       themeState.currentBg = prefs.bg || 'dark';
       themeState.customizations = prefs.customizations || {};
     }
@@ -51,10 +51,11 @@ function saveUserPreferences() {
   }
 }
 
-// Apply theme (light/dark)
+// Apply theme (see THEMES for valid ids)
 export function applyTheme(themeName) {
-  document.body.setAttribute('data-theme', themeName);
-  themeState.currentTheme = themeName;
+  const id = normalizeTheme(themeName);
+  document.body.setAttribute('data-theme', id);
+  themeState.currentTheme = id;
   saveUserPreferences();
   
   // Update UI toggles
@@ -71,21 +72,43 @@ export function applyBackground(bgName) {
   updateBgUI();
 }
 
-// Toggle between light and dark theme
+// Cycle to the next theme in THEMES order.
 export function toggleTheme() {
-  const newTheme = themeState.currentTheme === 'dark' ? 'light' : 'dark';
-  applyTheme(newTheme);
-  return newTheme;
+  const idx = THEMES.findIndex(t => t.id === normalizeTheme(themeState.currentTheme));
+  const next = THEMES[(idx + 1) % THEMES.length];
+  applyTheme(next.id);
+  return next.id;
 }
 
 // Setup event listeners for theme controls
 function setupEventListeners() {
-  // Theme toggle button
+  // Opens the theme picker.
+  const themeBtn = document.getElementById('themeBtn');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => openThemePicker());
+  }
+
+  const themeModalClose = document.getElementById('themeModalClose');
+  if (themeModalClose) {
+    themeModalClose.addEventListener('click', () => {
+      const m = document.getElementById('themeModal');
+      if (m) m.hidden = true;
+    });
+  }
+
+  const themeModal = document.getElementById('themeModal');
+  if (themeModal) {
+    themeModal.addEventListener('click', (e) => {
+      if (e.target === themeModal) themeModal.hidden = true;
+    });
+  }
+
+  // Legacy single-toggle button, kept working if a build still has one.
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', () => {
       const newTheme = toggleTheme();
-      showThemeNotification(`Switched to ${newTheme} theme`);
+      showThemeNotification(`Switched to ${themeMeta(newTheme).name} theme`);
     });
   }
   
@@ -95,7 +118,7 @@ function setupEventListeners() {
       const theme = option.dataset.theme;
       if (theme) {
         applyTheme(theme);
-        showThemeNotification(`Theme changed to ${theme}`);
+        showThemeNotification(`Theme changed to ${themeMeta(theme).name}`);
       }
     });
   });
@@ -121,8 +144,12 @@ function updateThemeUI() {
   
   const toggleBtn = document.getElementById('themeToggleBtn');
   if (toggleBtn) {
-    toggleBtn.textContent = themeState.currentTheme === 'dark' ? '☀️' : '🌙';
-    toggleBtn.title = `Switch to ${themeState.currentTheme === 'dark' ? 'light' : 'dark'} theme`;
+    const meta = themeMeta(themeState.currentTheme);
+    const idx  = THEMES.findIndex(t => t.id === meta.id);
+    const next = THEMES[(idx + 1) % THEMES.length];
+    toggleBtn.textContent = meta.icon;
+    toggleBtn.title = `Theme: ${meta.name} — switch to ${next.name}`;
+    toggleBtn.setAttribute('aria-label', `Current theme ${meta.name}. Switch to ${next.name}.`);
   }
 }
 
@@ -204,12 +231,37 @@ export function resetToDefaults() {
   showThemeNotification('Reset to default theme');
 }
 
+// Themes offered to the user. Order matters: this is the cycle order used by
+// the header toggle button, and the order shown in any theme picker.
+export const THEMES = [
+  { id: 'dark',   name: 'Dark',   icon: '🌙', themeColor: '#0f1220' },
+  { id: 'light',  name: 'Light',  icon: '☀️', themeColor: '#f8f9ff' },
+  { id: 'pastel', name: 'Pastel', icon: '🌸', themeColor: '#fdf6fb' },
+  { id: 'earthy', name: 'Earthy', icon: '🌾', themeColor: '#f5efe3' },
+];
+
+function themeMeta(id) {
+  return THEMES.find(t => t.id === id) || THEMES[0];
+}
+
+/**
+ * Normalize a stored theme id. Anything unknown (including themes removed in an
+ * earlier build) falls back to dark rather than leaving the app unstyled.
+ */
+export function normalizeTheme(id) {
+  return THEMES.some(t => t.id === id) ? id : 'dark';
+}
+
+// Show the theme picker modal.
+export function openThemePicker() {
+  const modal = document.getElementById('themeModal');
+  if (modal) modal.hidden = false;
+  updateThemeUI();
+}
+
 // Get available themes
 export function getAvailableThemes() {
-  return [
-    { id: 'dark', name: 'Dark', icon: '🌙' },
-    { id: 'light', name: 'Light', icon: '☀️' }
-  ];
+  return THEMES.map(t => ({ id: t.id, name: t.name, icon: t.icon }));
 }
 
 // Get available backgrounds
