@@ -112,13 +112,16 @@ export async function fetchOpenRouterModels({ force = false } = {}) {
     const json = await res.json();
     const rows = Array.isArray(json?.data) ? json.data : [];
 
-    // Skip malformed rows rather than emitting an option with an undefined
-    // value, which would render an unpickable entry in the model list.
+    // A row with no usable id can't be selected or sent to the API, so drop it
+    // rather than emit a dead `<option value="">` / "undefined" entry. A
+    // whitespace-only id counts as unusable: it would otherwise pass the filter
+    // and suppress the curated fallback below with a single garbage entry.
     const mapped = rows
-      .filter(m => m && typeof m.id === 'string' && m.id)
+      .filter(m => m && typeof m.id === 'string' && m.id.trim())
       .map(m => {
         const free = _isFreeModel(m);
-        const name = m.name || m.id;
+        // Coerce: callers run label.toLowerCase() when filtering the picker.
+        const name = String(m.name || m.id);
         return { id: m.id, label: free ? `🆓 ${name}` : name, free };
       });
 
