@@ -11,15 +11,13 @@ import { encryptApiKey, decryptApiKey, verifyPassphrase }
   from '../../security/crypto.js';
 import { PERSONAS, buildSystemPrompt, checkInput, checkResponse }
   from '../../security/guardrails.js';
-import { PROVIDERS, streamChat, getDemoResponse }
+import { PROVIDERS, streamChat, getDemoResponse, fetchOpenRouterModels }
   from './providers.js';
 import { registerServiceWorker, setupInstall, promptInstall, IOS_INSTALL_HINT }
   from './pwa-install.js';
 import { showSandboxNotice }
   from './sandbox-notice.js';
-import { TIERS, effectiveLimits, can, shouldPersist }
-  from './tier-config.js';
-import { checkVoice, recordVoiceUsage }
+import { checkVoice, recordVoiceUsage, shouldPersist }
   from './voice-meter.js';
 import { speak as ttsSpeak }
   from './tts-engine.js';
@@ -30,7 +28,7 @@ import { detectDeviceKind, preflight }
 import { getModel, MAX_DOWNLOAD_MB } from './model-catalog.js';
 import { reviewPersona, composeSystemPrompt as guardCompose }
   from './persona-guard.js';
-import { savePersona, loadPersona, listPersonas, exportPersona, importPersona, clearServerCache, OFFLOAD_NOTICE }
+import { savePersona, loadPersona, listPersonas, deletePersona, exportPersona, importPersona, clearServerCache, OFFLOAD_NOTICE }
   from './persona-vault.js';
 import { probePc, pcChat, pokeAgentTask, relayChat }
   from './bridge-client.js';
@@ -42,7 +40,7 @@ import { loadFleetAgents, saveFleetAgent, loadFleetWorkflows, saveFleetWorkflow,
   from './agent-builder.js';
 import { executeCloudWorkflow }
   from './cloud-runner.js';
-import { streamModelCompletion, PROVIDERS }
+import { streamModelCompletion }
   from './cloud-model-adapter.js';
 import { pushLocalToCloud, getCloudSyncStatus }
   from './cloud-sync.js';
@@ -199,6 +197,9 @@ const dom = {
   bridgeIpInput:           $('bridgeIpInput'),
   bridgeConnectBtn:        $('bridgeConnectBtn'),
   bridgeStatus:            $('bridgeStatus'),
+  bridgeSettingsIpInput:   $('bridgeSettingsIpInput'),
+  bridgeSettingsConnectBtn:$('bridgeSettingsConnectBtn'),
+  bridgeSettingsStatus:    $('bridgeSettingsStatus'),
   bridgePairQrBtn:         $('bridgePairQrBtn'),
   bridgeUnpairBtn:         $('bridgeUnpairBtn'),
   bridgePairedStatus:      $('bridgePairedStatus'),
@@ -262,7 +263,6 @@ const dom = {
   onboardingStep3:         $('onboardingStep3'),
   onboardingStepIndicator: $('onboardingStepIndicator'),
   onboardDemoBtn:          $('onboardDemoBtn'),
-  onboardSetupBtn:         $('onboardSetupBtn'),
   onboardSetupBtn:         $('onboardSetupBtn'),
   onboardNextBtn:          $('onboardNextBtn'),
   // Pricing & Upgrades
@@ -1132,24 +1132,66 @@ function clearError(el) {
 }
 
 // ── Provider model switcher ───────────────────────────────────
+// Full catalog kept for the OpenRouter search box (so filtering never loses rows)
+let _modelCatalog = [];
+
+function paintModelOptions(models) {
+  dom.modelSelect.innerHTML = models
+    .map(m => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.label)}</option>`)
+    .join('');
+}
+
+/** Show/create the OpenRouter search box; wire it to filter the select live. */
+function ensureModelSearch(show) {
+  let search = document.getElementById('modelSearchInput');
+  if (!search && show) {
+    search = document.createElement('input');
+    search.type = 'text';
+    search.id = 'modelSearchInput';
+    search.className = 'form-input';
+    search.placeholder = '🔍 Search 300+ models (e.g. deepseek, qwen, free)…';
+    search.autocomplete = 'off';
+    search.style.marginBottom = '0.4rem';
+    dom.modelSelect.parentNode.insertBefore(search, dom.modelSelect);
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      const filtered = !q
+        ? _modelCatalog
+        : _modelCatalog.filter(m =>
+            m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q));
+      paintModelOptions(filtered.length ? filtered : [{ id: '', label: 'No matches' }]);
+    });
+  }
+  if (search) search.style.display = show ? '' : 'none';
+}
+
 function updateModelOptions(providerId) {
   const provider = PROVIDERS[providerId];
   if (!provider) return;
 
-  dom.modelSelect.innerHTML = provider.models
-    .map(m => `<option value="${m.id}">${m.label}</option>`)
-    .join('');
+  // Instant paint from the curated list (works for every provider, offline too).
+  _modelCatalog = provider.models.map(m => ({ id: m.id, label: m.label }));
+  paintModelOptions(_modelCatalog);
 
   // Update the docs link
   dom.getKeyLink.href = provider.docsUrl;
 
   const apiKeyGroup = dom.apiKeyInput.closest('.form-group');
   if (apiKeyGroup) {
-    if (providerId === 'local') {
-      apiKeyGroup.style.display = 'none';
-    } else {
-      apiKeyGroup.style.display = '';
-    }
+    apiKeyGroup.style.display = providerId === 'local' ? 'none' : '';
+  }
+
+  // OpenRouter: swap in the full live catalog + search box (LobeHub-style).
+  ensureModelSearch(providerId === 'openrouter');
+  if (providerId === 'openrouter') {
+    fetchOpenRouterModels().then(models => {
+      // Guard against the user switching providers while the fetch was in flight.
+      if (dom.providerSelect.value !== 'openrouter') return;
+      if (models && models.length) {
+        _modelCatalog = models;
+        paintModelOptions(models);
+      }
+    }).catch(() => {});
   }
 }
 
@@ -1315,12 +1357,12 @@ function wireEvents() {
     dom.voiceToggleBtn.classList.toggle('voice-active', state.voiceEnabled);
   });
 
-  // R3: Bridge connect (LAN-direct)
-  dom.bridgeConnectBtn.addEventListener('click', async () => {
-    const addr = dom.bridgeIpInput.value.trim();
+  // R3: Bridge connect (LAN-direct) — shared by setup modal and bridge settings modal
+  async function connectLanBridge(inputEl, statusEl, btnEl) {
+    const addr = inputEl.value.trim();
     if (!addr) return;
-    dom.bridgeStatus.textContent = 'Connecting…';
-    dom.bridgeConnectBtn.disabled = true;
+    statusEl.textContent = 'Connecting…';
+    btnEl.disabled = true;
     try {
       const result = await probePc('http://' + addr + '/v1');
       if (result?.online) {
@@ -1328,19 +1370,26 @@ function wireEvents() {
         state.relayMode  = false;
         setBridgeConnected('lan');
         setConnectionStatus('connected', '💻 Your PC (LAN)');
-        dom.bridgeStatus.textContent = '✅ Connected!';
-        dom.bridgeStatus.style.color = '#10b981';
+        statusEl.textContent = '✅ Connected!';
+        statusEl.style.color = '#10b981';
       } else {
-        dom.bridgeStatus.textContent = "Can't reach that address — check Wi-Fi";
-        dom.bridgeStatus.style.color = '#fca5a5';
+        statusEl.textContent = "Can't reach that address — check Wi-Fi";
+        statusEl.style.color = '#fca5a5';
       }
     } catch {
-      dom.bridgeStatus.textContent = "Can't reach that address — check Wi-Fi";
-      dom.bridgeStatus.style.color = '#fca5a5';
+      statusEl.textContent = "Can't reach that address — check Wi-Fi";
+      statusEl.style.color = '#fca5a5';
     } finally {
-      dom.bridgeConnectBtn.disabled = false;
+      btnEl.disabled = false;
     }
-  });
+  }
+
+  dom.bridgeConnectBtn.addEventListener('click', () =>
+    connectLanBridge(dom.bridgeIpInput, dom.bridgeStatus, dom.bridgeConnectBtn));
+  if (dom.bridgeSettingsConnectBtn) {
+    dom.bridgeSettingsConnectBtn.addEventListener('click', () =>
+      connectLanBridge(dom.bridgeSettingsIpInput, dom.bridgeSettingsStatus, dom.bridgeSettingsConnectBtn));
+  }
 
   // Phase 4: Open bridge settings when bridge is selected in provider picker
   dom.providerSelect.addEventListener('change', () => {
@@ -1446,7 +1495,7 @@ function wireEvents() {
 
   // R4: Upgrade modal events
   dom.upgradeDismissBtn.addEventListener('click', () => hideModal(dom.upgradeModal));
-  dom.upgradeStartTrialBtn.addEventListener('click', () => {
+  dom.upgradeStartTrialBtn?.addEventListener('click', () => {
     // Placeholder — link to payment flow when available
     showToast('Trial sign-up coming soon!');
   });

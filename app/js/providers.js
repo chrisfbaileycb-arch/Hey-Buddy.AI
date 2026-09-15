@@ -27,11 +27,11 @@ export const PROVIDERS = {
     label:       'Anthropic',
     docsUrl:     'https://console.anthropic.com/settings/keys',
     models:      [
-      { id: 'claude-haiku-3-5',   label: 'Claude Haiku 3.5 (fast)' },
-      { id: 'claude-sonnet-4-5',  label: 'Claude Sonnet 4.5' },
-      { id: 'claude-opus-4-5',    label: 'Claude Opus 4.5 (powerful)' },
+      { id: 'claude-haiku-4-5',   label: 'Claude Haiku 4.5 (fast)' },
+      { id: 'claude-sonnet-5',    label: 'Claude Sonnet 5 (balanced)' },
+      { id: 'claude-opus-5',      label: 'Claude Opus 5 (powerful)' },
     ],
-    defaultModel: 'claude-haiku-3-5',
+    defaultModel: 'claude-haiku-4-5',
   },
   google: {
     label:       'Google (Gemini)',
@@ -51,7 +51,7 @@ export const PROVIDERS = {
       { id: 'deepseek/deepseek-r1:free',             label: '🐋 DeepSeek R1 Reasoning (FREE)' },
       { id: 'google/gemini-2.0-flash-exp:free',        label: '⚡ Gemini 2.0 Flash (FREE)' },
       { id: 'qwen/qwen-2.5-coder-32b-instruct:free',  label: '💻 Qwen 2.5 Coder 32B (FREE)' },
-      { id: 'anthropic/claude-haiku-3-5',              label: 'Claude Haiku 3.5' },
+      { id: 'anthropic/claude-haiku-4.5',              label: 'Claude Haiku 4.5' },
       { id: 'openai/gpt-4o-mini',                      label: 'GPT-4o mini' },
     ],
     defaultModel: 'meta-llama/llama-3.3-70b-instruct:free',
@@ -63,6 +63,92 @@ export const PROVIDERS = {
     defaultModel: '',
   },
 };
+
+// ── OpenRouter live catalog ────────────────────────────────────
+// OpenRouter exposes its full model list (300+) at a public endpoint that
+// needs no API key. We fetch it once, sort free models first, cache it, and
+// let the picker show the whole buffet — the LobeHub-style experience.
+// If the fetch fails (offline / blocked), the hardcoded PROVIDERS.openrouter
+// list above stays in place as a fallback.
+const OPENROUTER_MODELS_URL = 'https://openrouter.ai/api/v1/models';
+let _openRouterCatalog = null; // in-memory cache for this session
+
+function _isFreeModel(m) {
+  // A model is "free" when both prompt and completion prices are 0,
+  // or its id carries the :free suffix OpenRouter uses.
+  if (typeof m.id === 'string' && m.id.endsWith(':free')) return true;
+  const p = m.pricing || {};
+  const prompt = parseFloat(p.prompt ?? '0');
+  const completion = parseFloat(p.completion ?? '0');
+  return prompt === 0 && completion === 0;
+}
+
+/**
+ * Fetch the full OpenRouter model catalog. Returns an array of
+ * { id, label, free } sorted free-first, then alphabetically.
+ * Cached in memory + sessionStorage so it only hits the network once
+ * per session. Never throws — returns the hardcoded fallback on failure.
+ */
+export async function fetchOpenRouterModels({ force = false } = {}) {
+  if (_openRouterCatalog && !force) return _openRouterCatalog;
+
+  // sessionStorage cache (survives in-session navigation, not a hard dependency)
+  if (!force) {
+    try {
+      const cached = sessionStorage.getItem('hb_openrouter_catalog_v1');
+      if (cached) {
+        _openRouterCatalog = JSON.parse(cached);
+        return _openRouterCatalog;
+      }
+    } catch { /* ignore cache read errors */ }
+  }
+
+  try {
+    const res = await fetch(OPENROUTER_MODELS_URL, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const rows = Array.isArray(json?.data) ? json.data : [];
+
+    // A row with no usable id can't be selected or sent to the API, so drop it
+    // rather than emit a dead `<option value="">` / "undefined" entry. A
+    // whitespace-only id counts as unusable: it would otherwise pass the filter
+    // and suppress the curated fallback below with a single garbage entry.
+    const mapped = rows
+      .filter(m => m && typeof m.id === 'string' && m.id.trim())
+      .map(m => {
+        const free = _isFreeModel(m);
+        // Coerce: callers run label.toLowerCase() when filtering the picker.
+        const name = String(m.name || m.id);
+        return { id: m.id, label: free ? `🆓 ${name}` : name, free };
+      });
+
+    // Free first, then alphabetical by label within each group.
+    mapped.sort((a, b) => {
+      if (a.free !== b.free) return a.free ? -1 : 1;
+      return a.label.localeCompare(b.label);
+    });
+
+    if (mapped.length) {
+      _openRouterCatalog = mapped;
+      try {
+        sessionStorage.setItem('hb_openrouter_catalog_v1', JSON.stringify(mapped));
+      } catch { /* quota / private mode — fine, memory cache still holds */ }
+      return mapped;
+    }
+  } catch {
+    // Network blocked, offline, or timed out — fall through to fallback.
+  }
+
+  // Fallback: the curated hardcoded list.
+  return PROVIDERS.openrouter.models.map(m => ({
+    id: m.id,
+    label: m.label,
+    free: m.id.endsWith(':free'),
+  }));
+}
 
 // ── Streaming chat ─────────────────────────────────────────────
 /**
