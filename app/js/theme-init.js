@@ -3,14 +3,17 @@
  * Lives in its own file (not inline) because the app's CSP is
  * script-src 'self', which blocks inline scripts.
  */
-import { initThemeManager, watchSystemTheme } from './theme-manager.js';
+import { initThemeManager, watchSystemTheme, THEMES } from './theme-manager.js';
 
 /** Keep the browser/status-bar theme-color meta in sync with the active theme. */
 function syncThemeColor() {
   const themeColorMeta = document.getElementById('themeColorMeta');
   if (!themeColorMeta) return;
-  const isLight = document.body.getAttribute('data-theme') === 'light';
-  themeColorMeta.setAttribute('content', isLight ? '#f8f9ff' : '#0f1220');
+  const active = document.body.getAttribute('data-theme');
+  // Resolve from the theme table so new themes don't silently keep a stale
+  // status-bar color (the dark default used to leak onto every light theme).
+  const meta = THEMES.find(t => t.id === active) || THEMES[0];
+  themeColorMeta.setAttribute('content', meta.themeColor);
 }
 
 document.addEventListener('DOMContentLoaded', () => {

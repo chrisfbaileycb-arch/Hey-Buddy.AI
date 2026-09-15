@@ -63,6 +63,8 @@ import { generateDailyHunt, getProgress, checkIn, isCompleted, getTodayPoints,
 import { getPlayerLocation, renderOSMMap, isNearWaypoint,
          DEMO_COORDS, DEMO_WAYPOINTS } from './hunt-map.js';
 import { isParkMomentEnabled, checkParkMoment, simulateParkMoment } from './park-moment.js';
+import { initAdminPanel, setAdminCatalog } from './admin-panel.js';
+import { getVisibility, applyVisibility, countByTier, setVisibility } from './model-access.js';
 
 // ── Crypto adapter (device key, fixed per-device) ────────────
 const deviceKey = localStorage.getItem('hb_device_key_v1') || (() => {
@@ -410,6 +412,9 @@ async function activateAccessIdBypass(accessId = 'TESTER_PASS') {
 // ── Initialization ───────────────────────────────────────────
 async function init() {
   await openDB();
+  // Load the persisted free/paid visibility before the first paint so the
+  // picker never flashes models the operator has chosen to hide.
+  try { _visCache = await getVisibility(); } catch (e) {}
   await loadApiConfig();
   wireEvents();
   setActivePersona('drill');
@@ -1134,11 +1139,71 @@ function clearError(el) {
 // ── Provider model switcher ───────────────────────────────────
 // Full catalog kept for the OpenRouter search box (so filtering never loses rows)
 let _modelCatalog = [];
+// Cached mirror of the persisted free/paid visibility so the synchronous paint
+// path can filter without awaiting IndexedDB on every keystroke.
+let _visCache = { showFree: true, showPaid: true };
 
 function paintModelOptions(models) {
-  dom.modelSelect.innerHTML = models
+  const visible = applyVisibility(models, _visCache);
+
+  dom.modelSelect.innerHTML = visible
     .map(m => `<option value="${escapeHtml(m.id)}">${escapeHtml(m.label)}</option>`)
     .join('');
+
+  // Keep the persisted choice selected across a filter change, so hiding the
+  // paid group never silently repoints the user at a different model.
+  if (state.apiConfig?.model && visible.some(m => m.id === state.apiConfig.model)) {
+    dom.modelSelect.value = state.apiConfig.model;
+  }
+
+  paintTierCounts();
+}
+
+/**
+ * Refresh the Free/Paid toggle counts.
+ * Counted from the full `_modelCatalog`, never the painted list, so searching the
+ * picker cannot make the totals look like they shrank.
+ */
+function paintTierCounts() {
+  const counts = countByTier(_modelCatalog);
+  const free = document.getElementById('tierCountFree');
+  const paid = document.getElementById('tierCountPaid');
+  const freeBox = document.getElementById('tierToggleFree');
+  const paidBox = document.getElementById('tierTogglePaid');
+  if (free) free.textContent = counts.free;
+  if (paid) paid.textContent = counts.paid;
+  if (freeBox) freeBox.checked = _visCache.showFree;
+  if (paidBox) paidBox.checked = _visCache.showPaid;
+
+  // Warn only when a filter would leave the picker with nothing to show.
+  const warn = document.getElementById('modelTierWarning');
+  if (warn) {
+    const shown = (_visCache.showFree ? counts.free : 0) + (_visCache.showPaid ? counts.paid : 0);
+    const empty = counts.total > 0 && shown === 0;
+    warn.hidden = !empty;
+    warn.textContent = empty ? '⚠️ All models are hidden — enable Free or Paid to pick one.' : '';
+  }
+
+  // Keep the admin panel's counts live if it happens to be open.
+  setAdminCatalog(_modelCatalog);
+}
+
+/** Bind the Free/Paid checkboxes to persisted visibility. */
+function wireTierToggles() {
+  const freeBox = document.getElementById('tierToggleFree');
+  const paidBox = document.getElementById('tierTogglePaid');
+  if (!freeBox || !paidBox) return;
+
+  const onChange = async () => {
+    _visCache = await setVisibility({
+      showFree: freeBox.checked,
+      showPaid: paidBox.checked,
+    });
+    if (_modelCatalog.length) paintModelOptions(_modelCatalog);
+  };
+
+  freeBox.addEventListener('change', onChange);
+  paidBox.addEventListener('change', onChange);
 }
 
 /** Show/create the OpenRouter search box; wire it to filter the select live. */
@@ -1155,11 +1220,21 @@ function ensureModelSearch(show) {
     dom.modelSelect.parentNode.insertBefore(search, dom.modelSelect);
     search.addEventListener('input', () => {
       const q = search.value.trim().toLowerCase();
+      // Search operates on the already-visibility-filtered catalog so the
+      // free/paid toggles and the text query compose rather than fight.
+      const base = applyVisibility(_modelCatalog, _visCache);
       const filtered = !q
-        ? _modelCatalog
-        : _modelCatalog.filter(m =>
+        ? base
+        : base.filter(m =>
             m.label.toLowerCase().includes(q) || m.id.toLowerCase().includes(q));
-      paintModelOptions(filtered.length ? filtered : [{ id: '', label: 'No matches' }]);
+      // A query with no hits says so rather than repainting the full list, which
+      // would look like the search silently failed. Written directly so the
+      // placeholder is never dropped by the free/paid filter.
+      if (filtered.length) {
+        paintModelOptions(filtered);
+      } else {
+        dom.modelSelect.innerHTML = '<option value="">No matches</option>';
+      }
     });
   }
   if (search) search.style.display = show ? '' : 'none';
@@ -1284,6 +1359,21 @@ function autoResizeTextarea() {
 
 // ── Event wiring ─────────────────────────────────────────────
 function wireEvents() {
+  // Free/paid model visibility toggles
+  wireTierToggles();
+
+  // Operator console (passphrase-gated local key vault)
+  initAdminPanel({
+    // Re-paint when the panel changes visibility so the picker reflects it
+    // immediately, without a reload.
+    onModelsChanged: () => {
+      getVisibility().then(vis => {
+        _visCache = vis;
+        if (_modelCatalog.length) paintModelOptions(_modelCatalog);
+      });
+    },
+  });
+
   // Persona buttons
   dom.personaList.querySelectorAll('.persona-btn:not(.custom-locked)').forEach(btn => {
     btn.addEventListener('click', () => {

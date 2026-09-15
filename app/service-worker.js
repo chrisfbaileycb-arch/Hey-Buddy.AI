@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION whenever you ship a new build so old shells are purged.
  */
 
-const CACHE_VERSION = 'heybuddy-v2';
+const CACHE_VERSION = 'heybuddy-v4';
 
 // The "app shell" — only static UI assets. Add/adjust to match your real files.
 // Do NOT add API endpoints, model downloads, or user data here.
@@ -19,8 +19,13 @@ const SHELL_ASSETS = [
   '/app/css/app.css',
   '/app/css/sandbox-notice.css',
   '/app/css/theme-customization.css',
+  '/app/css/admin-panel.css',
   '/app/js/app.js',
   '/app/js/theme-manager.js',
+  '/app/js/theme-init.js',
+  '/app/js/admin-panel.js',
+  '/app/js/admin-vault.js',
+  '/app/js/model-access.js',
   '/app/manifest.json',
   '/app/icons/icon-192.png',
   '/app/icons/icon-512.png',

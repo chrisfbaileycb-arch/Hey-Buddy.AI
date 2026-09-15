@@ -1,0 +1,220 @@
+/* ============================================================
+   Hey Buddy — Admin Panel (operator console) & model tier toggles
+   Reuses the existing modal + form primitives; this file only adds
+   the vault table, the tier toggles, and layout glue.
+   ============================================================ */
+
+.admin-card {
+  max-width: 720px;
+  width: 92vw;
+}
+
+.admin-card .modal-body {
+  max-height: 62vh;
+  overflow-y: auto;
+}
+
+.admin-section {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-section:last-child { border-bottom: none; }
+
+.admin-section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.35rem;
+}
+
+.admin-section-head h3 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+
+.admin-blurb {
+  font-size: 0.76rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0 0 0.75rem;
+}
+
+.admin-hint,
+.admin-note {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-top: 0.3rem;
+}
+
+.admin-note { color: var(--persona); }
+
+.admin-error {
+  font-size: 0.76rem;
+  color: #ef4444;
+  margin: 0 0 0.6rem;
+}
+
+.admin-blurb code { font-size: 0.72rem; }
+
+/* ── Lock screen ─────────────────────────────────────────── */
+.admin-lock { padding: 0.5rem 0 1rem; }
+
+/* ── Vault table ─────────────────────────────────────────── */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.76rem;
+}
+
+.admin-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-faint);
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.admin-table td {
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text-muted);
+}
+
+.admin-entry-label { color: var(--text); font-weight: 600; }
+
+.admin-entry-id {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.admin-empty {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 1rem 0;
+}
+
+.admin-row-actions {
+  display: flex;
+  gap: 0.3rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.admin-pill {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.1rem 0.42rem;
+  border-radius: var(--r-full);
+  background: var(--persona-dim);
+  color: var(--persona);
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Buttons ─────────────────────────────────────────────── */
+.admin-btn {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.6rem;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  transition: all var(--t-fast);
+}
+
+.admin-btn:hover {
+  border-color: var(--persona);
+  background: var(--bg-card-hover);
+}
+
+.admin-btn-danger { color: #ef4444; }
+
+.admin-btn-danger:hover {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* ── Form layout ─────────────────────────────────────────── */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 0.75rem;
+}
+
+.admin-inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.admin-inline .form-input { flex: 1; }
+
+.admin-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  padding: 0.3rem 0;
+  cursor: pointer;
+}
+
+/* ── Free / paid toggles in the model picker ─────────────── */
+.model-tier-toggles {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.tier-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 0.22rem 0.6rem;
+  cursor: pointer;
+  transition: all var(--t-fast);
+  user-select: none;
+}
+
+.tier-toggle:hover { border-color: var(--persona); }
+
+.tier-toggle input {
+  accent-color: var(--persona);
+  margin: 0;
+  cursor: pointer;
+}
+
+.tier-count {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-faint);
+}
+
+/* An unchecked group reads as inactive at a glance. */
+.tier-toggle:has(input:not(:checked)) {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+@media (max-width: 640px) {
+  .admin-grid { grid-template-columns: 1fr; }
+  .admin-card { width: 96vw; }
+}
