@@ -76,8 +76,8 @@ let _openRouterCatalog = null; // in-memory cache for this session
 function _isFreeModel(m) {
   // A model is "free" when both prompt and completion prices are 0,
   // or its id carries the :free suffix OpenRouter uses.
-  if (typeof m.id === 'string' && m.id.endsWith(':free')) return true;
-  const p = m.pricing || {};
+  if (typeof m?.id === 'string' && m.id.endsWith(':free')) return true;
+  const p = m?.pricing || {};
   const prompt = parseFloat(p.prompt ?? '0');
   const completion = parseFloat(p.completion ?? '0');
   return prompt === 0 && completion === 0;
@@ -112,11 +112,15 @@ export async function fetchOpenRouterModels({ force = false } = {}) {
     const json = await res.json();
     const rows = Array.isArray(json?.data) ? json.data : [];
 
-    const mapped = rows.map(m => {
-      const free = _isFreeModel(m);
-      const name = m.name || m.id;
-      return { id: m.id, label: free ? `🆓 ${name}` : name, free };
-    });
+    const mapped = rows
+      // A row with no usable id can't be selected or sent to the API, so drop it
+      // rather than emit a dead `<option value="">` / "undefined" entry.
+      .filter(m => m && typeof m.id === 'string' && m.id.trim())
+      .map(m => {
+        const free = _isFreeModel(m);
+        const name = String(m.name || m.id);
+        return { id: m.id, label: free ? `🆓 ${name}` : name, free };
+      });
 
     // Free first, then alphabetical by label within each group.
     mapped.sort((a, b) => {
