@@ -112,11 +112,15 @@ export async function fetchOpenRouterModels({ force = false } = {}) {
     const json = await res.json();
     const rows = Array.isArray(json?.data) ? json.data : [];
 
-    const mapped = rows.map(m => {
-      const free = _isFreeModel(m);
-      const name = m.name || m.id;
-      return { id: m.id, label: free ? `🆓 ${name}` : name, free };
-    });
+    // Skip malformed rows rather than emitting an option with an undefined
+    // value, which would render an unpickable entry in the model list.
+    const mapped = rows
+      .filter(m => m && typeof m.id === 'string' && m.id)
+      .map(m => {
+        const free = _isFreeModel(m);
+        const name = m.name || m.id;
+        return { id: m.id, label: free ? `🆓 ${name}` : name, free };
+      });
 
     // Free first, then alphabetical by label within each group.
     mapped.sort((a, b) => {

@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION whenever you ship a new build so old shells are purged.
  */
 
-const CACHE_VERSION = 'heybuddy-v2';
+const CACHE_VERSION = 'heybuddy-v3';
 
 // The "app shell" — only static UI assets. Add/adjust to match your real files.
 // Do NOT add API endpoints, model downloads, or user data here.
